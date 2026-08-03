@@ -67,6 +67,28 @@
     @keyframes pulse-ring { 0% { transform: scale(.85); opacity: .7; } 100% { transform: scale(1.25); opacity: 0; } }
     .radar-ring { animation: pulse-ring 2.6s ease-out infinite; }
 
+    /* 3D viewer controls */
+    .model-tab {
+      min-width: 64px; padding: 6px 12px; border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+      color: rgba(224,224,224,.6); transition: background .25s ease, color .25s ease;
+    }
+    .model-tab:hover { color: #00e5ff; }
+    .model-tab.is-active { background: rgba(0,229,255,.14); color: #00e5ff; }
+
+    #explodeRange::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,.6); cursor: pointer;
+    }
+    #explodeRange::-moz-range-thumb {
+      width: 14px; height: 14px; border: 0; border-radius: 50%;
+      background: #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,.6); cursor: pointer;
+    }
+    #explodeBar.is-disabled { opacity: .45; }
+    #explodeBar.is-disabled #explodeRange { pointer-events: none; }
+
     /* Focus visibility */
     a:focus-visible, button:focus-visible, input:focus-visible {
       outline: 2px solid #00e5ff; outline-offset: 3px; border-radius: 2px;
@@ -294,15 +316,38 @@
 
         <div class="reveal relative overflow-hidden rounded-xl border border-white/10 bg-[#0a101c]" style="transition-delay:.12s">
           <div id="uavViewer" class="aspect-[4/5] w-full touch-none sm:aspect-[16/12]"
-               aria-label="Interactive 3D model of the Hawk 1 UAV airframe. Drag to rotate, scroll or pinch to zoom."></div>
+               aria-label="Interactive 3D model viewer. Drag to rotate, scroll or pinch to zoom."></div>
+
+          <!-- Model selector -->
+          <div class="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 gap-1 rounded-md border border-white/10 bg-ink/85 p-1 backdrop-blur"
+               role="tablist" aria-label="Select aircraft model">
+            <button type="button" class="model-tab" data-model="uav1" role="tab" aria-selected="false">UAV 1</button>
+            <button type="button" class="model-tab is-active" data-model="uav2" role="tab" aria-selected="true">UAV 2</button>
+          </div>
+
+          <!-- Assemble / explode control -->
+          <div id="explodeBar" class="absolute inset-x-14 bottom-5 z-10 rounded-md border border-white/10 bg-ink/85 px-4 py-2.5 backdrop-blur">
+            <div class="flex items-center gap-3">
+              <label for="explodeRange" class="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-accent/90">
+                Assemble
+              </label>
+              <input id="explodeRange" type="range" min="0" max="100" value="0" step="1"
+                     class="h-1 w-full flex-1 cursor-pointer appearance-none rounded bg-white/15 accent-accent"
+                     aria-label="Assemble to exploded view">
+              <label for="explodeRange" class="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-accent/90">
+                Explode
+              </label>
+            </div>
+            <p id="explodeNote" class="mt-1 hidden text-center font-mono text-[10px] uppercase tracking-widest text-soft/40">
+              Single-body model
+            </p>
+          </div>
+
           <!-- HUD corners -->
           <div class="pointer-events-none absolute left-4 top-4 h-8 w-8 border-l-2 border-t-2 border-accent/70" aria-hidden="true"></div>
           <div class="pointer-events-none absolute right-4 top-4 h-8 w-8 border-r-2 border-t-2 border-accent/70" aria-hidden="true"></div>
           <div class="pointer-events-none absolute bottom-4 left-4 h-8 w-8 border-b-2 border-l-2 border-accent/70" aria-hidden="true"></div>
           <div class="pointer-events-none absolute bottom-4 right-4 h-8 w-8 border-b-2 border-r-2 border-accent/70" aria-hidden="true"></div>
-          <div class="pointer-events-none absolute bottom-6 left-6 font-mono text-[11px] uppercase tracking-widest text-accent/90">
-            UAV-01 · Drag to rotate · Scroll to zoom
-          </div>
         </div>
       </div>
     </section>
@@ -348,16 +393,16 @@
             </figcaption>
           </figure>
 
-          <figure class="reveal sys-card overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]" style="transition-delay:.2s">
-            <img src="assets/hawk1-prototype.jpg" loading="lazy"
-                 alt="Hawk 1 prototype on the bench, ready for flight test"
-                 class="aspect-video w-full object-cover">
+          <figure id="simFigure" class="reveal sys-card overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]" style="transition-delay:.2s">
+            <video src="assets/sim-run.mp4" autoplay muted loop playsinline preload="metadata"
+                   aria-label="Flight dynamics simulation sweeping the UAV 2 through its envelope"
+                   class="aspect-video w-full bg-white object-cover"></video>
             <figcaption class="p-5 lg:p-6">
-              <p class="font-mono text-xs uppercase tracking-widest text-accent">03 · Flight Test</p>
-              <h3 class="mt-2 text-lg font-bold text-white">Real hardware, real air</h3>
+              <p class="font-mono text-xs uppercase tracking-widest text-accent">03 · Flight Dynamics</p>
+              <h3 class="mt-2 text-lg font-bold text-white">Stability solved before first flight</h3>
               <p class="mt-2 text-sm leading-relaxed text-soft/60">
-                The Hawk 1 prototype validates VTOL transition and autonomous waypoint flight on the range
-                near Tashkent.
+                Lift distribution and stability are swept across the flight envelope — then confirmed in the
+                air by the Hawk 1 prototype.
               </p>
             </figcaption>
           </figure>
@@ -508,10 +553,17 @@
   <div id="lightbox" class="fixed inset-0 z-[60] hidden items-center justify-center bg-ink/95 p-4 backdrop-blur-sm"
        role="dialog" aria-modal="true" aria-label="Media viewer">
     <button id="lbClose" aria-label="Close viewer"
-            class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded border border-white/20 text-2xl leading-none text-white transition hover:border-accent hover:text-accent">&times;</button>
+            class="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded border border-white/20 text-2xl leading-none text-white transition hover:border-accent hover:text-accent">&times;</button>
+    <button id="lbPrev" aria-label="Previous"
+            class="absolute left-2 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded border border-white/20 bg-ink/70 text-xl leading-none text-white transition hover:border-accent hover:text-accent sm:left-6">&#8249;</button>
+    <button id="lbNext" aria-label="Next"
+            class="absolute right-2 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded border border-white/20 bg-ink/70 text-xl leading-none text-white transition hover:border-accent hover:text-accent sm:right-6">&#8250;</button>
     <figure class="w-full max-w-5xl">
       <div id="lbMedia" class="overflow-hidden rounded-lg border border-white/10"></div>
-      <figcaption id="lbCaption" class="mt-3 text-center text-sm text-soft/70"></figcaption>
+      <figcaption class="mt-3 text-center text-sm text-soft/70">
+        <span id="lbCaption"></span>
+        <span id="lbCounter" class="ml-2 font-mono text-xs text-accent/80"></span>
+      </figcaption>
     </figure>
   </div>
 
@@ -606,28 +658,63 @@
     var lbMedia = document.getElementById('lbMedia');
     var lbCaption = document.getElementById('lbCaption');
     var lbClose = document.getElementById('lbClose');
+    var lbPrev = document.getElementById('lbPrev');
+    var lbNext = document.getElementById('lbNext');
+    var lbCounter = document.getElementById('lbCounter');
     var lbLastFocus = null;
+    var lbSlides = [];
+    var lbIndex = 0;
 
-    function openLightbox(srcNode, caption) {
+    /* Render one slide: {type:'video'|'image', src, caption, alt} */
+    function renderSlide(i) {
+      var s = lbSlides[i];
+      if (!s) return;
+      lbIndex = i;
       lbMedia.innerHTML = '';
       var full;
-      if (srcNode.tagName === 'VIDEO') {
+      if (s.type === 'video') {
         full = document.createElement('video');
-        full.src = srcNode.getAttribute('src');
+        full.src = s.src;
         full.controls = true;
         full.muted = true;
         full.loop = true;
         full.playsInline = true;
         if (!reduceMotion) full.autoplay = true;
-        full.setAttribute('aria-label', srcNode.getAttribute('aria-label') || caption);
+        full.setAttribute('aria-label', s.alt || s.caption);
       } else {
         full = document.createElement('img');
-        full.src = srcNode.getAttribute('src');
-        full.alt = srcNode.alt || caption;
+        full.src = s.src;
+        full.alt = s.alt || s.caption;
       }
       full.className = 'max-h-[80vh] w-full bg-black object-contain';
       lbMedia.appendChild(full);
-      lbCaption.textContent = caption;
+      lbCaption.textContent = s.caption || '';
+      var many = lbSlides.length > 1;
+      lbCounter.textContent = many ? (i + 1) + ' / ' + lbSlides.length : '';
+      lbPrev.classList.toggle('hidden', !many);
+      lbPrev.classList.toggle('flex', many);
+      lbNext.classList.toggle('hidden', !many);
+      lbNext.classList.toggle('flex', many);
+    }
+
+    function step(delta) {
+      if (lbSlides.length < 2) return;
+      renderSlide((lbIndex + delta + lbSlides.length) % lbSlides.length);
+    }
+
+    /* Accepts a DOM node (single item) or an array of slide descriptors */
+    function openLightbox(source, caption, startIndex) {
+      if (Array.isArray(source)) {
+        lbSlides = source;
+      } else {
+        lbSlides = [{
+          type: source.tagName === 'VIDEO' ? 'video' : 'image',
+          src: source.getAttribute('src'),
+          alt: source.getAttribute('aria-label') || source.alt || caption,
+          caption: caption
+        }];
+      }
+      renderSlide(startIndex || 0);
       lightbox.classList.remove('hidden');
       lightbox.classList.add('flex');
       document.body.style.overflow = 'hidden';
@@ -640,32 +727,67 @@
       lightbox.classList.add('hidden');
       lightbox.classList.remove('flex');
       lbMedia.innerHTML = '';
+      lbSlides = [];
       document.body.style.overflow = '';
       if (lbLastFocus) lbLastFocus.focus();
     }
 
     lbClose.addEventListener('click', closeLightbox);
+    lbPrev.addEventListener('click', function (e) { e.stopPropagation(); step(-1); });
+    lbNext.addEventListener('click', function (e) { e.stopPropagation(); step(1); });
     lightbox.addEventListener('click', function (e) {
       if (e.target === lightbox) closeLightbox();
     });
     document.addEventListener('keydown', function (e) {
+      if (lightbox.classList.contains('hidden')) return;
       if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft') step(-1);
+      else if (e.key === 'ArrowRight') step(1);
     });
+
+    /* Swipe between slides on touch devices */
+    var touchX = null;
+    lbMedia.addEventListener('touchstart', function (e) {
+      touchX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    lbMedia.addEventListener('touchend', function (e) {
+      if (touchX === null) return;
+      var dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
+      touchX = null;
+    }, { passive: true });
+
+    /* Flight-dynamics card: a gallery of simulation sweeps, ending on the real aircraft */
+    var simSlides = [
+      { type: 'video', src: 'assets/sim-run.mp4', caption: 'Flight dynamics — full envelope sweep' },
+      { type: 'image', src: 'assets/sim/22.png', caption: 'Flight dynamics — α −5° (negative lift)' },
+      { type: 'image', src: 'assets/sim/33.png', caption: 'Flight dynamics — low-alpha cruise' },
+      { type: 'image', src: 'assets/sim/78.png', caption: 'Flight dynamics — α 15° (high lift)' },
+      { type: 'image', src: 'assets/sim/87.png', caption: 'Flight dynamics — stall-margin sweep' },
+      { type: 'image', src: 'assets/hawk1-prototype.jpg', caption: 'Hawk 1 prototype — the simulated airframe, built' }
+    ];
 
     document.querySelectorAll('#engineering figure').forEach(function (fig) {
       var media = fig.querySelector('video, img');
       var title = fig.querySelector('h3');
       if (!media) return;
       var label = title ? title.textContent.trim() : 'media';
+      var isSim = fig.id === 'simFigure';
       fig.setAttribute('tabindex', '0');
       fig.setAttribute('role', 'button');
-      fig.setAttribute('aria-label', 'View full size: ' + label);
+      fig.setAttribute('aria-label', isSim
+        ? 'Open simulation gallery: ' + simSlides.length + ' slides'
+        : 'View full size: ' + label);
       fig.classList.add('cursor-pointer');
-      fig.addEventListener('click', function () { openLightbox(media, label); });
+      var open = function () {
+        if (isSim) openLightbox(simSlides, null, 0);
+        else openLightbox(media, label);
+      };
+      fig.addEventListener('click', open);
       fig.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          openLightbox(media, label);
+          open();
         }
       });
     });
@@ -748,8 +870,29 @@
     const container = document.getElementById('uavViewer');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    /* UAV 1 is a single-body airframe; UAV 2 is the full assembly, one file per component
+       (each already exported in assembly coordinates, so they line up when loaded together). */
+    const MODELS = {
+      uav1: { label: 'UAV 1', explodable: false, parts: ['assets/uav-1.stl'] },
+      uav2: {
+        label: 'UAV 2', explodable: true,
+        parts: [
+          'assets/parts/uav-1.stl',
+          'assets/parts/bldc-9.stl', 'assets/parts/bldc-10.stl', 'assets/parts/bldc-11.stl',
+          'assets/parts/bldc-12.stl', 'assets/parts/bldc-13.stl',
+          'assets/parts/parrak-2-1.stl', 'assets/parts/parrak-2-2.stl', 'assets/parts/parrak-2-3.stl',
+          'assets/parts/parrak-2-4.stl', 'assets/parts/parrak-2-5.stl',
+          'assets/parts/blds-holder-1.stl', 'assets/parts/blds-holder-2.stl',
+          'assets/parts/blds-holder-3.stl', 'assets/parts/blds-holder-4.stl',
+          'assets/parts/carbon-tube-2.stl', 'assets/parts/carbon-tube-3.stl',
+          'assets/parts/holder-1-1.stl', 'assets/parts/holder-1-2.stl'
+        ]
+      }
+    };
+
     /* If anything fails (no WebGL, model missing, file:// CORS), fall back to the CAD film */
     function fallbackVideo() {
+      container.dataset.model = 'fallback';
       container.innerHTML = '';
       const v = document.createElement('video');
       v.src = 'assets/assembly.mp4';
@@ -787,6 +930,15 @@
       controls.autoRotateSpeed = 1.2;
       controls.addEventListener('start', () => { controls.autoRotate = false; });
 
+      /* pivot carries the floating bob; group holds the centred model */
+      const pivot = new THREE.Group();
+      scene.add(pivot);
+      let group = null;          // currently displayed model
+      let floatAmp = 0;          // set from model size
+      const cache = {};          // modelKey -> THREE.Group
+      const loader = new STLLoader();
+      let explodeT = 0;          // 0 = assembled, 1 = fully exploded
+
       function resize() {
         const w = container.clientWidth, h = container.clientHeight;
         if (!w || !h) return;
@@ -797,43 +949,150 @@
       new ResizeObserver(resize).observe(container);
       resize();
 
-      new STLLoader().load('assets/uav-model.stl',
-        (geometry) => {
-          geometry.computeBoundingBox();
-          const center = new THREE.Vector3();
-          geometry.boundingBox.getCenter(center);
-          geometry.translate(-center.x, -center.y, -center.z);
-          geometry.computeVertexNormals();
+      const loadGeometry = (url) => new Promise((resolve, reject) => {
+        loader.load(url, resolve, undefined, reject);
+      });
 
-          const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
-            color: 0x8b95a5, metalness: 0.55, roughness: 0.35
-          }));
-          /* SolidWorks exports Z-up; three.js is Y-up */
-          mesh.rotation.x = -Math.PI / 2;
-          scene.add(mesh);
+      async function buildModel(key) {
+        if (cache[key]) return cache[key];
+        const spec = MODELS[key];
+        const geometries = await Promise.all(spec.parts.map(loadGeometry));
 
-          const sphere = new THREE.Sphere();
-          geometry.boundingBox.getBoundingSphere(sphere);
-          const dist = sphere.radius * 2.4;
-          camera.position.set(dist * 0.8, dist * 0.45, dist * 0.8);
-          camera.near = sphere.radius / 100;
-          camera.far = sphere.radius * 100;
-          camera.updateProjectionMatrix();
-          controls.minDistance = sphere.radius * 1.2;
-          controls.maxDistance = sphere.radius * 6;
-          controls.update();
-        },
-        undefined,
-        () => fallbackVideo()
-      );
+        const g = new THREE.Group();
+        const material = new THREE.MeshStandardMaterial({
+          color: 0x8b95a5, metalness: 0.55, roughness: 0.35
+        });
+
+        /* Combined bounds across every component, so parts keep their relative places */
+        const whole = new THREE.Box3();
+        geometries.forEach((geo) => {
+          geo.computeBoundingBox();
+          whole.union(geo.boundingBox);
+        });
+        const center = new THREE.Vector3();
+        whole.getCenter(center);
+
+        geometries.forEach((geo) => {
+          geo.translate(-center.x, -center.y, -center.z);
+          geo.computeVertexNormals();
+          const mesh = new THREE.Mesh(geo, material);
+
+          /* direction each part travels when exploding: outward from the model centre */
+          const box = new THREE.Box3().setFromBufferAttribute(geo.attributes.position);
+          const partCenter = new THREE.Vector3();
+          box.getCenter(partCenter);
+          const dir = partCenter.clone();
+          if (dir.lengthSq() < 1e-6) dir.set(0, 1, 0);   // a part sitting dead-centre
+          mesh.userData.dir = dir.normalize();
+          g.add(mesh);
+        });
+
+        /* SolidWorks exports Z-up; three.js is Y-up */
+        g.rotation.x = -Math.PI / 2;
+
+        const sphere = new THREE.Sphere();
+        whole.getBoundingSphere(sphere);
+        g.userData.radius = sphere.radius;
+        g.userData.triangles = geometries.reduce(
+          (n, geo) => n + geo.attributes.position.count / 3, 0);
+
+        cache[key] = g;
+        return g;
+      }
+
+      function applyExplode() {
+        if (!group) return;
+        const spread = group.userData.radius * 0.75 * explodeT;
+        let maxOffset = 0;
+        group.children.forEach((mesh) => {
+          mesh.position.copy(mesh.userData.dir).multiplyScalar(spread);
+          maxOffset = Math.max(maxOffset, mesh.position.length());
+        });
+        container.dataset.explode = maxOffset.toFixed(1);
+      }
+
+      async function showModel(key) {
+        const spec = MODELS[key];
+        container.dataset.model = 'loading';
+        let g;
+        try {
+          g = await buildModel(key);
+        } catch (e) {
+          fallbackVideo();
+          return;
+        }
+
+        if (group) pivot.remove(group);
+        group = g;
+        pivot.add(group);
+
+        const radius = group.userData.radius;
+        floatAmp = reduceMotion ? 0 : radius * 0.035;
+
+        const dist = radius * 2.4;
+        camera.position.set(dist * 0.8, dist * 0.45, dist * 0.8);
+        camera.near = radius / 100;
+        camera.far = radius * 100;
+        camera.updateProjectionMatrix();
+        controls.minDistance = radius * 0.6;
+        controls.maxDistance = radius * 10;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        /* single-body models have nothing to take apart */
+        explodeT = 0;
+        if (explodeRange) explodeRange.value = '0';
+        if (explodeBar) explodeBar.classList.toggle('is-disabled', !spec.explodable);
+        if (explodeRange) explodeRange.disabled = !spec.explodable;
+        if (explodeNote) explodeNote.classList.toggle('hidden', spec.explodable);
+        applyExplode();
+
+        container.dataset.model = 'loaded';
+        container.dataset.active = key;
+        container.dataset.tris = String(group.userData.triangles);
+      }
+
+      /* ---- controls wiring ---- */
+      const explodeRange = document.getElementById('explodeRange');
+      const explodeBar = document.getElementById('explodeBar');
+      const explodeNote = document.getElementById('explodeNote');
+      const tabs = document.querySelectorAll('.model-tab');
+
+      if (explodeRange) {
+        explodeRange.addEventListener('input', () => {
+          explodeT = Number(explodeRange.value) / 100;
+          applyExplode();
+        });
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const key = tab.dataset.model;
+          if (container.dataset.active === key) return;
+          tabs.forEach((t) => {
+            const on = t === tab;
+            t.classList.toggle('is-active', on);
+            t.setAttribute('aria-selected', String(on));
+          });
+          showModel(key);
+        });
+      });
+
+      showModel('uav2');
 
       /* Render only while the viewer is near the viewport */
       let visible = true;
       new IntersectionObserver((entries) => { visible = entries[0].isIntersecting; },
         { rootMargin: '100px' }).observe(container);
 
+      const clock = new THREE.Clock();
       renderer.setAnimationLoop(() => {
         if (!visible) return;
+        const t = clock.getElapsedTime();
+        if (floatAmp) {
+          pivot.position.y = Math.sin(t * 0.9) * floatAmp;
+          pivot.rotation.z = Math.sin(t * 0.5) * 0.02;   /* faint drift, like a hover */
+        }
         controls.update();
         renderer.render(scene, camera);
       });
