@@ -248,17 +248,17 @@
 
           <!-- Card 3 -->
           <article class="reveal sys-card group overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg lg:col-auto col-span-2 lg:col-span-1" style="transition-delay:.2s">
-            <div class="relative aspect-[16/10] overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80"
-                   alt="Aegis Core command network visualisation" loading="lazy"
-                   class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+            <div id="interceptionMedia" class="relative aspect-[16/10] cursor-pointer overflow-hidden">
+              <video src="assets/interception.mp4" autoplay muted loop playsinline preload="metadata"
+                     aria-label="Autonomous interception flight test"
+                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"></video>
               <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent"></div>
-              <span class="absolute left-4 top-4 rounded border border-accent/40 bg-ink/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">C2 AI</span>
+              <span class="absolute left-4 top-4 rounded border border-accent/40 bg-ink/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Interception</span>
             </div>
             <div class="p-5 lg:p-6">
               <h3 class="text-xl font-bold text-white lg:text-2xl">Aegis Core</h3>
               <p class="mt-2 text-sm leading-relaxed text-soft/70">
-                The command layer: one operator, an entire fleet — AI handles the flying, humans make the call.
+                Autonomous aerial interception — detect, track, and neutralise hostile drones before they reach the perimeter.
               </p>
               <a href="#" class="mt-4 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent transition group-hover:gap-3">
                 Learn more <span aria-hidden="true">→</span>
@@ -700,6 +700,22 @@
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           openLightbox(puVideo, 'Power Unit');
+        }
+      });
+    }
+
+    /* Aegis Core card media opens the full interception video */
+    var intMediaBox = document.getElementById('interceptionMedia');
+    if (intMediaBox) {
+      var intVideo = intMediaBox.querySelector('video');
+      intMediaBox.setAttribute('tabindex', '0');
+      intMediaBox.setAttribute('role', 'button');
+      intMediaBox.setAttribute('aria-label', 'View full video: Aegis Core interception');
+      intMediaBox.addEventListener('click', function () { openLightbox(intVideo, 'Aegis Core — interception'); });
+      intMediaBox.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openLightbox(intVideo, 'Aegis Core — interception');
         }
       });
     }
