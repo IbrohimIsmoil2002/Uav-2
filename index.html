@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>I.I Industries — Autonomous Defence Systems</title>
+  <meta name="description" content="I.I Industries builds AI-piloted aerial systems that detect, decide, and act. Founded by Ismoilov Ibrohim.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23080c14'/%3E%3Ctext x='16' y='22' font-family='Arial,sans-serif' font-size='14' font-weight='800' fill='%2300e5ff' text-anchor='middle'%3EI.I%3C/text%3E%3C/svg%3E">
+
+  <!-- Inter from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#080c14',
+            panel: '#0d1320',
+            accent: '#00e5ff',
+            soft: '#e0e0e0'
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { background: #080c14; color: #e0e0e0; overflow-x: hidden; }
+    ::selection { background: rgba(0,229,255,.25); color: #fff; }
+
+    /* Scroll-reveal */
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.is-in { opacity: 1; transform: none; }
+
+    /* Glowing primary CTA (gradient border) */
+    .cta-glow {
+      position: relative;
+      background: linear-gradient(#0a101c, #0a101c) padding-box,
+                  linear-gradient(100deg, #00e5ff, #2563eb 60%, #00e5ff) border-box;
+      border: 1px solid transparent;
+      transition: box-shadow .3s ease, transform .3s ease;
+    }
+    .cta-glow:hover { box-shadow: 0 0 28px rgba(0,229,255,.35), inset 0 0 12px rgba(0,229,255,.08); transform: translateY(-1px); }
+
+    /* Product / news card hover */
+    .sys-card { transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease; }
+    .sys-card:hover { transform: scale(1.02); border-color: rgba(0,229,255,.45); box-shadow: 0 0 32px rgba(0,229,255,.12); }
+
+    /* Tech spotlight scan-line */
+    @keyframes scan { 0% { top: -4%; } 100% { top: 104%; } }
+    .scanline {
+      position: absolute; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,229,255,.9), transparent);
+      box-shadow: 0 0 18px 2px rgba(0,229,255,.5);
+      animation: scan 4.5s linear infinite;
+    }
+
+    @keyframes pulse-ring { 0% { transform: scale(.85); opacity: .7; } 100% { transform: scale(1.25); opacity: 0; } }
+    .radar-ring { animation: pulse-ring 2.6s ease-out infinite; }
+
+    /* Focus visibility */
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 2px solid #00e5ff; outline-offset: 3px; border-radius: 2px;
+    }
+
+    /* Hamburger → X */
+    .hb-line { transition: transform .3s ease, opacity .3s ease; }
+    .hb-open .hb-line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hb-open .hb-line:nth-child(2) { opacity: 0; }
+    .hb-open .hb-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Reduced motion: show everything, stop decoration */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .scanline, .radar-ring { animation: none; }
+      .sys-card:hover, .cta-glow:hover { transform: none; }
+    }
+  </style>
+</head>
+
+<body class="bg-ink font-sans antialiased">
+
+  <!-- ======================= NAVBAR ======================= -->
+  <header id="navbar" class="fixed inset-x-0 top-0 z-50 transition-all duration-300">
+    <nav class="mx-auto flex h-20 max-w-7xl items-center justify-between px-6" aria-label="Main">
+      <a href="#top" class="flex items-center gap-2.5 text-lg font-extrabold tracking-[0.18em] text-accent">
+        <svg class="h-7 w-7 shrink-0" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <path d="M20 4 L36 33 L20 26 L4 33 Z" stroke="#00e5ff" stroke-width="2.4" stroke-linejoin="round"/>
+          <path d="M20 13 L29 29 L20 25 L11 29 Z" fill="#00e5ff" fill-opacity="0.4"/>
+        </svg>
+        I.I&nbsp;INDUSTRIES<span class="text-white">.</span>
+      </a>
+
+      <!-- Desktop links -->
+      <div class="hidden items-center gap-8 lg:flex">
+        <a href="#systems" class="text-sm font-medium text-soft/80 transition hover:text-accent">Systems</a>
+        <a href="#technology" class="text-sm font-medium text-soft/80 transition hover:text-accent">Technology</a>
+        <a href="https://t.me/PVsyst_tahlili" target="_blank" rel="noopener" class="text-sm font-medium text-soft/80 transition hover:text-accent">PVsyst Tahlili</a>
+        <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener" class="text-sm font-medium text-soft/80 transition hover:text-accent">Founder</a>
+        <a href="tel:+99899494012" class="cta-glow rounded-md px-5 py-2.5 text-sm font-semibold text-white">
+          +998 99 49 40 12
+        </a>
+      </div>
+
+      <!-- Hamburger -->
+      <button id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu"
+              class="flex h-11 w-11 flex-col items-center justify-center gap-1.5 lg:hidden">
+        <span class="hb-line block h-0.5 w-6 bg-white"></span>
+        <span class="hb-line block h-0.5 w-6 bg-white"></span>
+        <span class="hb-line block h-0.5 w-6 bg-white"></span>
+      </button>
+    </nav>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu"
+         class="pointer-events-none fixed inset-0 z-40 translate-x-full bg-ink/95 backdrop-blur-xl transition-transform duration-300 lg:hidden">
+      <div class="flex h-full flex-col items-center justify-center gap-8 px-8 text-center">
+        <a href="#systems" class="menu-link text-2xl font-bold text-white transition hover:text-accent">Systems</a>
+        <a href="#technology" class="menu-link text-2xl font-bold text-white transition hover:text-accent">Technology</a>
+        <a href="https://t.me/PVsyst_tahlili" target="_blank" rel="noopener" class="menu-link text-2xl font-bold text-white transition hover:text-accent">PVsyst Tahlili</a>
+        <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener" class="menu-link text-2xl font-bold text-white transition hover:text-accent">Founder</a>
+        <a href="tel:+99899494012" class="menu-link cta-glow mt-4 rounded-md px-8 py-3.5 text-lg font-semibold text-white">
+          +998 99 49 40 12
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ======================= HERO ======================= -->
+    <section class="relative flex min-h-screen items-center justify-center overflow-hidden">
+      <div class="absolute inset-0 overflow-hidden" aria-hidden="true">
+        <video src="assets/hero-bg.mp4" autoplay muted loop playsinline preload="metadata"
+               class="bg-video absolute inset-0 h-full w-full object-cover"></video>
+      </div>
+      <div class="pointer-events-none absolute inset-0 bg-ink/50"></div>
+      <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/40 via-transparent to-ink"></div>
+
+      <div class="relative z-10 mx-auto max-w-5xl px-6 pt-20 text-center">
+        <p class="reveal mb-6 text-xs font-semibold uppercase tracking-[0.35em] text-accent">
+          Autonomous Aerial Systems &middot; Tashkent, Uzbekistan
+        </p>
+        <h1 class="reveal text-5xl font-black leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-8xl" style="transition-delay:.08s">
+          Autonomous security.<br>
+          <span class="bg-gradient-to-r from-accent to-blue-500 bg-clip-text text-transparent">Unthinkable speed.</span>
+        </h1>
+        <p class="reveal mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-soft/80 sm:text-xl" style="transition-delay:.16s">
+          I.I Industries builds AI-piloted aircraft that detect, decide, and act in seconds —
+          giving defenders the edge before a threat becomes an attack.
+        </p>
+        <div class="reveal mt-10 flex flex-col items-center justify-center gap-5 sm:flex-row" style="transition-delay:.24s">
+          <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener"
+             class="cta-glow rounded-md px-9 py-4 text-base font-semibold text-white">
+            Book a Demo
+          </a>
+          <a href="https://youtu.be/OnpuNlE3UxU" target="_blank" rel="noopener"
+             class="group flex min-h-[44px] items-center gap-2 px-4 py-2 text-base font-medium text-soft/80 transition hover:text-accent">
+            Watch the film
+            <span class="transition-transform group-hover:translate-x-1">▸</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 text-soft/40" aria-hidden="true">
+        <svg class="h-6 w-6 animate-bounce" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7-7-7"></path>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ======================= MISSION / MANIFESTO ======================= -->
+    <section class="relative py-24 lg:py-32">
+      <div class="reveal mx-auto max-w-4xl px-6 text-center">
+        <div class="mx-auto mb-10 h-px w-24 bg-gradient-to-r from-transparent via-accent to-transparent"></div>
+        <blockquote class="text-3xl font-bold leading-snug text-white sm:text-4xl lg:text-5xl">
+          “We are building the decisive edge for modern defence.”
+        </blockquote>
+        <p class="mt-8 text-sm font-semibold uppercase tracking-[0.3em] text-soft/50">
+          Ismoilov Ibrohim — Founder
+        </p>
+      </div>
+    </section>
+
+    <!-- ======================= PRODUCTS / SOLUTIONS ======================= -->
+    <section id="systems" class="scroll-mt-24 py-24 lg:py-32">
+      <div class="mx-auto max-w-7xl px-6">
+        <div class="reveal mb-14 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-accent">Product Line</p>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white lg:text-5xl">Explore our systems</h2>
+          </div>
+          <p class="max-w-sm text-sm leading-relaxed text-soft/60">
+            A family of autonomous aircraft and the intelligence layer that binds them into one force.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-5 lg:grid-cols-3 lg:gap-7">
+          <!-- Card 1 -->
+          <article class="reveal sys-card group overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg">
+            <div id="hawk1Media" class="relative aspect-[16/10] cursor-pointer overflow-hidden">
+              <img src="assets/hawk1-prototype.jpg"
+                   alt="Hawk 1 flying-wing VTOL prototype with four lift rotors" loading="lazy"
+                   class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+              <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent"></div>
+              <span class="absolute left-4 top-4 rounded border border-accent/40 bg-ink/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">VTOL &middot; Prototype</span>
+            </div>
+            <div class="p-5 lg:p-6">
+              <h3 class="text-xl font-bold text-white lg:text-2xl">Hawk 1</h3>
+              <p class="mt-2 text-sm leading-relaxed text-soft/70">
+                A unique combination of vertical take-off and fixed-wing cruise — no runway, no compromise on range.
+              </p>
+              <a href="#engineering" class="mt-4 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent transition group-hover:gap-3">
+                Learn more <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </article>
+
+          <!-- Card 2 -->
+          <article class="reveal sys-card group overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg" style="transition-delay:.1s">
+            <div id="powerUnitMedia" class="relative aspect-[16/10] cursor-pointer overflow-hidden">
+              <video src="assets/power-unit.mp4" autoplay muted loop playsinline preload="metadata"
+                     aria-label="Bench test of the I.I Industries power unit"
+                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"></video>
+              <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent"></div>
+              <span class="absolute left-4 top-4 rounded border border-accent/40 bg-ink/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Power units</span>
+            </div>
+            <div class="p-5 lg:p-6">
+              <h3 class="text-xl font-bold text-white lg:text-2xl">Power Unit</h3>
+              <p class="mt-2 text-sm leading-relaxed text-soft/70">
+                In-house propulsion for Hawk-class airframes — bench-tested for thrust, endurance, and reliability.
+              </p>
+              <a href="#" class="mt-4 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent transition group-hover:gap-3">
+                Learn more <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </article>
+
+          <!-- Card 3 -->
+          <article class="reveal sys-card group overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg lg:col-auto col-span-2 lg:col-span-1" style="transition-delay:.2s">
+            <div class="relative aspect-[16/10] overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80"
+                   alt="Aegis Core command network visualisation" loading="lazy"
+                   class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+              <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent"></div>
+              <span class="absolute left-4 top-4 rounded border border-accent/40 bg-ink/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">C2 AI</span>
+            </div>
+            <div class="p-5 lg:p-6">
+              <h3 class="text-xl font-bold text-white lg:text-2xl">Aegis Core</h3>
+              <p class="mt-2 text-sm leading-relaxed text-soft/70">
+                The command layer: one operator, an entire fleet — AI handles the flying, humans make the call.
+              </p>
+              <a href="#" class="mt-4 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent transition group-hover:gap-3">
+                Learn more <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= TECHNOLOGY SPOTLIGHT ======================= -->
+    <section id="technology" class="scroll-mt-24 bg-panel py-24 lg:py-32">
+      <div class="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20">
+        <div class="reveal">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-accent">Core Technology</p>
+          <h2 class="text-4xl font-extrabold leading-tight tracking-tight text-white lg:text-5xl">
+            AI-powered <br>self-deciding drones
+          </h2>
+          <p class="mt-7 text-base leading-relaxed text-soft/75 lg:text-lg">
+            Every I.I Industries aircraft carries its intelligence on board. When the link is jammed and GPS is
+            denied, the mission continues — the aircraft classifies targets, weighs options, and manoeuvres on
+            its own, in milliseconds.
+          </p>
+          <p class="mt-5 text-base leading-relaxed text-soft/75 lg:text-lg">
+            Trained on thousands of simulated engagements, the onboard AI makes our systems close to unbeatable in
+            real combat conditions — while the final, critical decision always remains with a human operator.
+          </p>
+          <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener"
+             class="mt-9 inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-accent transition hover:gap-4">
+            Request technical brief <span aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <div class="reveal relative overflow-hidden rounded-xl border border-white/10 bg-[#0a101c]" style="transition-delay:.12s">
+          <div id="uavViewer" class="aspect-[4/5] w-full touch-none sm:aspect-[16/12]"
+               aria-label="Interactive 3D model of the Hawk 1 UAV airframe. Drag to rotate, scroll or pinch to zoom."></div>
+          <!-- HUD corners -->
+          <div class="pointer-events-none absolute left-4 top-4 h-8 w-8 border-l-2 border-t-2 border-accent/70" aria-hidden="true"></div>
+          <div class="pointer-events-none absolute right-4 top-4 h-8 w-8 border-r-2 border-t-2 border-accent/70" aria-hidden="true"></div>
+          <div class="pointer-events-none absolute bottom-4 left-4 h-8 w-8 border-b-2 border-l-2 border-accent/70" aria-hidden="true"></div>
+          <div class="pointer-events-none absolute bottom-4 right-4 h-8 w-8 border-b-2 border-r-2 border-accent/70" aria-hidden="true"></div>
+          <div class="pointer-events-none absolute bottom-6 left-6 font-mono text-[11px] uppercase tracking-widest text-accent/90">
+            UAV-01 · Drag to rotate · Scroll to zoom
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= ENGINEERING (CAD → CFD → FLIGHT) ======================= -->
+    <section id="engineering" class="scroll-mt-24 py-24 lg:py-32">
+      <div class="mx-auto max-w-7xl px-6">
+        <div class="reveal mb-14 max-w-2xl">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-accent">Engineering</p>
+          <h2 class="text-4xl font-extrabold tracking-tight text-white lg:text-5xl">Designed. Simulated. Flown.</h2>
+          <p class="mt-5 text-base leading-relaxed text-soft/70">
+            Every I.I Industries airframe follows the same discipline: a parametric CAD twin, aerodynamics
+            proven in simulation, then real hardware on the test range.
+          </p>
+        </div>
+
+        <div class="grid gap-6 lg:grid-cols-3">
+          <figure class="reveal sys-card overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
+            <video src="assets/cad-animation.mp4" autoplay muted loop playsinline preload="metadata"
+                   aria-label="CAD animation of the Hawk 1 airframe assembly"
+                   class="aspect-video w-full object-cover"></video>
+            <figcaption class="p-5 lg:p-6">
+              <p class="font-mono text-xs uppercase tracking-widest text-accent">01 · Airframe CAD</p>
+              <h3 class="mt-2 text-lg font-bold text-white">Parametric digital twin</h3>
+              <p class="mt-2 text-sm leading-relaxed text-soft/60">
+                The full assembly is modelled part by part, so every structural change is verified before a
+                single component is cut.
+              </p>
+            </figcaption>
+          </figure>
+
+          <figure class="reveal sys-card overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]" style="transition-delay:.1s">
+            <video src="assets/cfd-analysis.mp4" autoplay muted loop playsinline preload="metadata"
+                   aria-label="CFD airflow simulation over the flying wing"
+                   class="aspect-video w-full object-cover"></video>
+            <figcaption class="p-5 lg:p-6">
+              <p class="font-mono text-xs uppercase tracking-widest text-accent">02 · CFD Validation</p>
+              <h3 class="mt-2 text-lg font-bold text-white">Aerodynamics proven before flight</h3>
+              <p class="mt-2 text-sm leading-relaxed text-soft/60">
+                Computational fluid dynamics maps pressure and flow across the flying wing, tuning lift and
+                stability at cruise.
+              </p>
+            </figcaption>
+          </figure>
+
+          <figure class="reveal sys-card overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]" style="transition-delay:.2s">
+            <img src="assets/hawk1-prototype.jpg" loading="lazy"
+                 alt="Hawk 1 prototype on the bench, ready for flight test"
+                 class="aspect-video w-full object-cover">
+            <figcaption class="p-5 lg:p-6">
+              <p class="font-mono text-xs uppercase tracking-widest text-accent">03 · Flight Test</p>
+              <h3 class="mt-2 text-lg font-bold text-white">Real hardware, real air</h3>
+              <p class="mt-2 text-sm leading-relaxed text-soft/60">
+                The Hawk 1 prototype validates VTOL transition and autonomous waypoint flight on the range
+                near Tashkent.
+              </p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= CAPABILITY HIGHLIGHTS (STATS) ======================= -->
+    <section class="border-y border-white/10 bg-ink py-16 lg:py-20">
+      <div class="mx-auto grid max-w-7xl grid-cols-2 gap-10 px-6 text-center md:grid-cols-4">
+        <div class="reveal">
+          <p class="text-4xl font-black text-white lg:text-5xl">
+            <span class="stat" data-target="99.8" data-decimals="1">0</span><span class="text-accent">%</span>
+          </p>
+          <p class="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-soft/50">Detection rate</p>
+        </div>
+        <div class="reveal" style="transition-delay:.08s">
+          <p class="text-4xl font-black text-white lg:text-5xl">
+            <span class="text-accent">&lt;</span><span class="stat" data-target="2">0</span>s
+          </p>
+          <p class="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-soft/50">Response time</p>
+        </div>
+        <div class="reveal" style="transition-delay:.16s">
+          <p class="text-4xl font-black text-white lg:text-5xl">
+            <span class="stat" data-target="50">0</span><span class="text-accent">+</span>
+          </p>
+          <p class="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-soft/50">Installations</p>
+        </div>
+        <div class="reveal" style="transition-delay:.24s">
+          <p class="text-4xl font-black text-white lg:text-5xl">
+            <span class="stat" data-target="24">0</span><span class="text-accent">/7</span>
+          </p>
+          <p class="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-soft/50">Autonomous watch</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= NEWS / INSIGHTS ======================= -->
+    <section id="news" class="relative scroll-mt-24 overflow-hidden py-24 lg:py-32">
+      <video src="assets/news-bg.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"
+             class="bg-video absolute inset-0 h-full w-full object-cover"></video>
+      <div class="absolute inset-0 bg-ink/75" aria-hidden="true"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-ink via-transparent to-ink" aria-hidden="true"></div>
+      <div class="relative z-10 mx-auto max-w-7xl px-6">
+        <div class="reveal mb-14">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-accent">Insights</p>
+          <h2 class="text-4xl font-extrabold tracking-tight text-white lg:text-5xl">Latest news</h2>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-3">
+          <article class="reveal sys-card rounded-xl border border-white/10 bg-white/[0.03] p-6 lg:p-7">
+            <time datetime="2025-11-18" class="font-mono text-xs uppercase tracking-widest text-accent">Nov 18, 2025</time>
+            <h3 class="mt-3 text-lg font-bold leading-snug text-white">
+              Hawk 1 completes 400 km fully autonomous flight trial
+            </h3>
+            <p class="mt-3 text-sm leading-relaxed text-soft/60">
+              The prototype flew a full mission profile — vertical launch, cruise, target survey, and return — without operator input.
+            </p>
+            <a href="#" class="mt-5 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent">Read more <span aria-hidden="true">→</span></a>
+          </article>
+
+          <article class="reveal sys-card rounded-xl border border-white/10 bg-white/[0.03] p-6 lg:p-7" style="transition-delay:.1s">
+            <time datetime="2025-09-02" class="font-mono text-xs uppercase tracking-widest text-accent">Sep 02, 2025</time>
+            <h3 class="mt-3 text-lg font-bold leading-snug text-white">
+              Sentinel Grid selected for critical-infrastructure pilot programme
+            </h3>
+            <p class="mt-3 text-sm leading-relaxed text-soft/60">
+              A regional energy operator will deploy the persistent-surveillance mesh across two solar generation sites.
+            </p>
+            <a href="#" class="mt-5 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent">Read more <span aria-hidden="true">→</span></a>
+          </article>
+
+          <article class="reveal sys-card rounded-xl border border-white/10 bg-white/[0.03] p-6 lg:p-7" style="transition-delay:.2s">
+            <time datetime="2025-06-27" class="font-mono text-xs uppercase tracking-widest text-accent">Jun 27, 2025</time>
+            <h3 class="mt-3 text-lg font-bold leading-snug text-white">
+              I.I Industries opens flight-test facility near Tashkent
+            </h3>
+            <p class="mt-3 text-sm leading-relaxed text-soft/60">
+              The new range supports year-round testing of VTOL transitions, swarm coordination, and GPS-denied navigation.
+            </p>
+            <a href="#" class="mt-5 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent">Read more <span aria-hidden="true">→</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= CAREERS / CTA BANNER ======================= -->
+    <section id="careers" class="scroll-mt-24 relative overflow-hidden bg-panel">
+      <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent" aria-hidden="true"></div>
+      <div class="reveal mx-auto max-w-4xl px-6 py-24 text-center lg:py-28">
+        <h2 class="text-4xl font-extrabold tracking-tight text-white lg:text-6xl">Join the mission</h2>
+        <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-soft/70">
+          We are a small team solving hard problems in autonomy, flight, and AI — and every engineer here ships
+          hardware that flies.
+        </p>
+        <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener"
+           class="cta-glow mt-10 inline-block rounded-md px-10 py-4 text-base font-semibold text-white">
+          View Open Roles
+        </a>
+      </div>
+      <div class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent" aria-hidden="true"></div>
+    </section>
+
+    <!-- ======================= CONTACT / FOOTER ======================= -->
+    <footer class="py-14">
+      <div class="mx-auto max-w-7xl px-6">
+        <div class="flex flex-col items-center justify-between gap-10 md:flex-row md:items-start">
+          <div class="text-center md:text-left">
+            <p class="flex items-center justify-center gap-2 text-base font-extrabold tracking-[0.18em] text-accent md:justify-start">
+              <svg class="h-5 w-5 shrink-0" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                <path d="M20 4 L36 33 L20 26 L4 33 Z" stroke="#00e5ff" stroke-width="2.4" stroke-linejoin="round"/>
+                <path d="M20 13 L29 29 L20 25 L11 29 Z" fill="#00e5ff" fill-opacity="0.4"/>
+              </svg>
+              I.I&nbsp;INDUSTRIES<span class="text-white">.</span>
+            </p>
+            <p class="mt-3 text-sm text-soft/50">© 2025 I.I Industries. All rights reserved.</p>
+            <p class="mt-1 text-sm text-soft/50">Founded by Ismoilov Ibrohim</p>
+          </div>
+
+          <nav class="flex gap-8 text-sm text-soft/60" aria-label="Legal">
+            <a href="#" class="transition hover:text-accent">Privacy</a>
+            <a href="#" class="transition hover:text-accent">Terms</a>
+            <a href="#" class="transition hover:text-accent">Accessibility</a>
+          </nav>
+
+          <div class="flex flex-col items-center gap-5 md:items-end">
+            <div class="flex gap-4 font-mono text-sm">
+              <a href="#" aria-label="LinkedIn" class="flex h-11 w-11 items-center justify-center rounded border border-white/10 text-soft/60 transition hover:border-accent/50 hover:text-accent">in</a>
+              <a href="#" aria-label="Twitter / X" class="flex h-11 w-11 items-center justify-center rounded border border-white/10 text-soft/60 transition hover:border-accent/50 hover:text-accent">tw</a>
+              <a href="#" aria-label="GitHub" class="flex h-11 w-11 items-center justify-center rounded border border-white/10 text-soft/60 transition hover:border-accent/50 hover:text-accent">gh</a>
+            </div>
+            <form class="flex w-full max-w-xs" onsubmit="return false" aria-label="Subscribe to updates">
+              <label for="subEmail" class="sr-only">Email address</label>
+              <input id="subEmail" type="email" placeholder="you@company.com" autocomplete="email"
+                     class="h-11 w-full rounded-l-md border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-soft/40 focus:border-accent/60 focus:outline-none">
+              <button type="submit"
+                      class="h-11 rounded-r-md border border-l-0 border-white/10 bg-accent/10 px-4 text-sm font-semibold text-accent transition hover:bg-accent/20">
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ======================= LIGHTBOX (full media viewer) ======================= -->
+  <div id="lightbox" class="fixed inset-0 z-[60] hidden items-center justify-center bg-ink/95 p-4 backdrop-blur-sm"
+       role="dialog" aria-modal="true" aria-label="Media viewer">
+    <button id="lbClose" aria-label="Close viewer"
+            class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded border border-white/20 text-2xl leading-none text-white transition hover:border-accent hover:text-accent">&times;</button>
+    <figure class="w-full max-w-5xl">
+      <div id="lbMedia" class="overflow-hidden rounded-lg border border-white/10"></div>
+      <figcaption id="lbCaption" class="mt-3 text-center text-sm text-soft/70"></figcaption>
+    </figure>
+  </div>
+
+  <!-- ======================= SCRIPTS ======================= -->
+  <script>
+  (function () {
+    'use strict';
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---------- Navbar: transparent → solid after 80px ---------- */
+    var navbar = document.getElementById('navbar');
+    var solidClasses = ['bg-ink/90', 'backdrop-blur-lg', 'border-b', 'border-white/10', 'shadow-lg'];
+    function onScroll() {
+      if (window.scrollY > 80) solidClasses.forEach(function (c) { navbar.classList.add(c); });
+      else solidClasses.forEach(function (c) { navbar.classList.remove(c); });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    /* ---------- Mobile menu ---------- */
+    var menuBtn = document.getElementById('menuBtn');
+    var mobileMenu = document.getElementById('mobileMenu');
+    function setMenu(open) {
+      menuBtn.setAttribute('aria-expanded', String(open));
+      menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      menuBtn.classList.toggle('hb-open', open);
+      mobileMenu.classList.toggle('translate-x-full', !open);
+      mobileMenu.classList.toggle('pointer-events-none', !open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
+    menuBtn.addEventListener('click', function () {
+      setMenu(menuBtn.getAttribute('aria-expanded') !== 'true');
+    });
+    mobileMenu.querySelectorAll('.menu-link').forEach(function (link) {
+      link.addEventListener('click', function () { setMenu(false); });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') setMenu(false);
+    });
+
+    /* ---------- Scroll reveal (Intersection Observer) ---------- */
+    var revealEls = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window && !reduceMotion) {
+      var revealObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-in');
+            revealObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      revealEls.forEach(function (el) { revealObs.observe(el); });
+    } else {
+      revealEls.forEach(function (el) { el.classList.add('is-in'); });
+    }
+
+    /* ---------- Stat count-up ---------- */
+    function animateStat(el) {
+      var target = parseFloat(el.dataset.target);
+      var decimals = parseInt(el.dataset.decimals || '0', 10);
+      var duration = 1400;
+      var start = null;
+      function frame(ts) {
+        if (!start) start = ts;
+        var p = Math.min((ts - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - p, 3); /* easeOutCubic */
+        el.textContent = (target * eased).toFixed(decimals);
+        if (p < 1) requestAnimationFrame(frame);
+        else el.textContent = target.toFixed(decimals);
+      }
+      requestAnimationFrame(frame);
+    }
+    var statEls = document.querySelectorAll('.stat');
+    if ('IntersectionObserver' in window && !reduceMotion) {
+      var statObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            animateStat(entry.target);
+            statObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      statEls.forEach(function (el) { statObs.observe(el); });
+    } else {
+      statEls.forEach(function (el) {
+        el.textContent = parseFloat(el.dataset.target).toFixed(parseInt(el.dataset.decimals || '0', 10));
+      });
+    }
+
+    /* ---------- Lightbox: engineering cards open full media ---------- */
+    var lightbox = document.getElementById('lightbox');
+    var lbMedia = document.getElementById('lbMedia');
+    var lbCaption = document.getElementById('lbCaption');
+    var lbClose = document.getElementById('lbClose');
+    var lbLastFocus = null;
+
+    function openLightbox(srcNode, caption) {
+      lbMedia.innerHTML = '';
+      var full;
+      if (srcNode.tagName === 'VIDEO') {
+        full = document.createElement('video');
+        full.src = srcNode.getAttribute('src');
+        full.controls = true;
+        full.muted = true;
+        full.loop = true;
+        full.playsInline = true;
+        if (!reduceMotion) full.autoplay = true;
+        full.setAttribute('aria-label', srcNode.getAttribute('aria-label') || caption);
+      } else {
+        full = document.createElement('img');
+        full.src = srcNode.getAttribute('src');
+        full.alt = srcNode.alt || caption;
+      }
+      full.className = 'max-h-[80vh] w-full bg-black object-contain';
+      lbMedia.appendChild(full);
+      lbCaption.textContent = caption;
+      lightbox.classList.remove('hidden');
+      lightbox.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      lbLastFocus = document.activeElement;
+      lbClose.focus();
+    }
+
+    function closeLightbox() {
+      if (lightbox.classList.contains('hidden')) return;
+      lightbox.classList.add('hidden');
+      lightbox.classList.remove('flex');
+      lbMedia.innerHTML = '';
+      document.body.style.overflow = '';
+      if (lbLastFocus) lbLastFocus.focus();
+    }
+
+    lbClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', function (e) {
+      if (e.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    document.querySelectorAll('#engineering figure').forEach(function (fig) {
+      var media = fig.querySelector('video, img');
+      var title = fig.querySelector('h3');
+      if (!media) return;
+      var label = title ? title.textContent.trim() : 'media';
+      fig.setAttribute('tabindex', '0');
+      fig.setAttribute('role', 'button');
+      fig.setAttribute('aria-label', 'View full size: ' + label);
+      fig.classList.add('cursor-pointer');
+      fig.addEventListener('click', function () { openLightbox(media, label); });
+      fig.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openLightbox(media, label);
+        }
+      });
+    });
+
+    /* Hawk 1 card: photo stays as cover, click plays the maiden flight */
+    var hawk1Box = document.getElementById('hawk1Media');
+    if (hawk1Box) {
+      var maidenVideo = document.createElement('video');
+      maidenVideo.setAttribute('src', 'assets/maiden-flight.mp4');
+      maidenVideo.setAttribute('aria-label', 'Hawk 1 maiden flight');
+      hawk1Box.setAttribute('tabindex', '0');
+      hawk1Box.setAttribute('role', 'button');
+      hawk1Box.setAttribute('aria-label', 'Watch: Hawk 1 maiden flight');
+      hawk1Box.addEventListener('click', function () { openLightbox(maidenVideo, 'Hawk 1 — maiden flight'); });
+      hawk1Box.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openLightbox(maidenVideo, 'Hawk 1 — maiden flight');
+        }
+      });
+    }
+
+    /* Power Unit card media opens the full video */
+    var puMediaBox = document.getElementById('powerUnitMedia');
+    if (puMediaBox) {
+      var puVideo = puMediaBox.querySelector('video');
+      puMediaBox.setAttribute('tabindex', '0');
+      puMediaBox.setAttribute('role', 'button');
+      puMediaBox.setAttribute('aria-label', 'View full video: Power Unit');
+      puMediaBox.addEventListener('click', function () { openLightbox(puVideo, 'Power Unit'); });
+      puMediaBox.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openLightbox(puVideo, 'Power Unit');
+        }
+      });
+    }
+
+    /* ---------- Local videos: respect reduced motion ---------- */
+    if (reduceMotion) {
+      document.querySelectorAll('video[autoplay]').forEach(function (v) {
+        v.removeAttribute('autoplay');
+        v.pause();
+        if (!v.classList.contains('bg-video')) v.controls = true;
+      });
+    }
+  })();
+  </script>
+
+  <!-- ======================= 3D MODEL VIEWER (Three.js) ======================= -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+
+    const container = document.getElementById('uavViewer');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* If anything fails (no WebGL, model missing, file:// CORS), fall back to the CAD film */
+    function fallbackVideo() {
+      container.innerHTML = '';
+      const v = document.createElement('video');
+      v.src = 'assets/assembly.mp4';
+      v.muted = true; v.loop = true; v.playsInline = true;
+      if (!reduceMotion) v.autoplay = true;
+      v.className = 'h-full w-full object-cover';
+      v.setAttribute('aria-label', 'Rotating CAD assembly of the Hawk 1 airframe');
+      container.appendChild(v);
+    }
+
+    try {
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      container.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
+
+      scene.add(new THREE.HemisphereLight(0xbfeaf5, 0x0a0f18, 1.1));
+      const key = new THREE.DirectionalLight(0xffffff, 1.6);
+      key.position.set(4, 6, 5);
+      scene.add(key);
+      const rim = new THREE.DirectionalLight(0x00e5ff, 0.7);
+      rim.position.set(-5, -2, -4);
+      scene.add(rim);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.enablePan = false;
+      controls.autoRotate = !reduceMotion;
+      controls.autoRotateSpeed = 1.2;
+      controls.addEventListener('start', () => { controls.autoRotate = false; });
+
+      function resize() {
+        const w = container.clientWidth, h = container.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      new ResizeObserver(resize).observe(container);
+      resize();
+
+      new STLLoader().load('assets/uav-model.stl',
+        (geometry) => {
+          geometry.computeBoundingBox();
+          const center = new THREE.Vector3();
+          geometry.boundingBox.getCenter(center);
+          geometry.translate(-center.x, -center.y, -center.z);
+          geometry.computeVertexNormals();
+
+          const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+            color: 0x8b95a5, metalness: 0.55, roughness: 0.35
+          }));
+          /* SolidWorks exports Z-up; three.js is Y-up */
+          mesh.rotation.x = -Math.PI / 2;
+          scene.add(mesh);
+
+          const sphere = new THREE.Sphere();
+          geometry.boundingBox.getBoundingSphere(sphere);
+          const dist = sphere.radius * 2.4;
+          camera.position.set(dist * 0.8, dist * 0.45, dist * 0.8);
+          camera.near = sphere.radius / 100;
+          camera.far = sphere.radius * 100;
+          camera.updateProjectionMatrix();
+          controls.minDistance = sphere.radius * 1.2;
+          controls.maxDistance = sphere.radius * 6;
+          controls.update();
+        },
+        undefined,
+        () => fallbackVideo()
+      );
+
+      /* Render only while the viewer is near the viewport */
+      let visible = true;
+      new IntersectionObserver((entries) => { visible = entries[0].isIntersecting; },
+        { rootMargin: '100px' }).observe(container);
+
+      renderer.setAnimationLoop(() => {
+        if (!visible) return;
+        controls.update();
+        renderer.render(scene, camera);
+      });
+    } catch (e) {
+      fallbackVideo();
+    }
+  </script>
+</body>
+</html>
