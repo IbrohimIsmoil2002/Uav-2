@@ -792,20 +792,23 @@
       });
     });
 
-    /* Hawk 1 card: photo stays as cover, click plays the maiden flight */
+    /* Hawk 1 card: photo stays as cover, click opens the flight-test gallery */
+    var hawk1Slides = [
+      { type: 'video', src: 'assets/maiden-flight.mp4', caption: 'Hawk 1 — maiden flight' },
+      { type: 'video', src: 'assets/hover-test.mp4', caption: 'Hawk 1 — VTOL hover test' },
+      { type: 'image', src: 'assets/hawk1-prototype.jpg', caption: 'Hawk 1 — prototype on the bench' }
+    ];
     var hawk1Box = document.getElementById('hawk1Media');
     if (hawk1Box) {
-      var maidenVideo = document.createElement('video');
-      maidenVideo.setAttribute('src', 'assets/maiden-flight.mp4');
-      maidenVideo.setAttribute('aria-label', 'Hawk 1 maiden flight');
       hawk1Box.setAttribute('tabindex', '0');
       hawk1Box.setAttribute('role', 'button');
-      hawk1Box.setAttribute('aria-label', 'Watch: Hawk 1 maiden flight');
-      hawk1Box.addEventListener('click', function () { openLightbox(maidenVideo, 'Hawk 1 — maiden flight'); });
+      hawk1Box.setAttribute('aria-label', 'Open Hawk 1 gallery: ' + hawk1Slides.length + ' items');
+      var openHawk1 = function () { openLightbox(hawk1Slides, null, 0); };
+      hawk1Box.addEventListener('click', openHawk1);
       hawk1Box.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          openLightbox(maidenVideo, 'Hawk 1 — maiden flight');
+          openHawk1();
         }
       });
     }
