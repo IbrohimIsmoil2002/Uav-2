@@ -1492,14 +1492,30 @@
       new ResizeObserver(resize).observe(container);
       resize();
 
-      const loadGeometry = (url) => new Promise((resolve, reject) => {
+      const loadOnce = (url) => new Promise((resolve, reject) => {
         loader.load(url, resolve, undefined, reject);
       });
+
+      /* A component fetch can fail transiently. Retry a couple of times, and if a
+         single part still refuses, draw the rest rather than dropping the model. */
+      async function loadGeometry(url, tries = 3) {
+        for (let i = 0; i < tries; i++) {
+          try {
+            return await loadOnce(url);
+          } catch (e) {
+            if (i === tries - 1) return null;
+            await new Promise((r) => setTimeout(r, 250 * (i + 1)));
+          }
+        }
+        return null;
+      }
 
       async function buildModel(key) {
         if (cache[key]) return cache[key];
         const spec = MODELS[key];
-        const geometries = await Promise.all(spec.parts.map(loadGeometry));
+        const loaded = await Promise.all(spec.parts.map((u) => loadGeometry(u)));
+        const geometries = loaded.filter(Boolean);
+        if (!geometries.length) throw new Error('no geometry loaded');
 
         const g = new THREE.Group();
         const material = new THREE.MeshStandardMaterial({
