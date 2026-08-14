@@ -19,11 +19,15 @@
       theme: {
         extend: {
           colors: {
-            ink: '#000000',
-            panel: '#0a0a0a',
-            accent: '#ffffff',
-            mute: '#8a8a8a',
-            soft: '#e0e0e0'
+            /* Every colour is a themed channel triple, so light/dark flips
+               with one attribute and Tailwind's /opacity modifiers still work. */
+            ink:     'rgb(var(--bg) / <alpha-value>)',
+            panel:   'rgb(var(--panel) / <alpha-value>)',
+            surface: 'rgb(var(--surface) / <alpha-value>)',
+            fg:      'rgb(var(--fg) / <alpha-value>)',
+            accent:  'rgb(var(--fg) / <alpha-value>)',
+            soft:    'rgb(var(--soft) / <alpha-value>)',
+            mute:    'rgb(var(--mute) / <alpha-value>)'
           },
           fontFamily: {
             sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
@@ -33,13 +37,54 @@
     }
   </script>
 
-  <style>
-    html { scroll-behavior: smooth; }
-    body { background: #000000; color: #e0e0e0; overflow-x: hidden; }
-    ::selection { background: rgba(255,255,255,.22); color: #fff; }
+  <script>
+    /* Set the theme before first paint so day mode never flashes black. */
+    (function () {
+      try {
+        var saved = localStorage.getItem('sd-theme');
+        var dark = saved ? saved === 'dark'
+                         : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
 
-    /* Monochrome house rule: every photograph and clip runs in greyscale. */
-    img:not(.no-gray), video:not(.no-gray) { filter: grayscale(1) contrast(1.05); }
+  <style>
+    /* ---- Theme tokens: night is the default, day flips every channel ---- */
+    :root {
+      --bg: 0 0 0;
+      --panel: 10 10 10;
+      --surface: 8 8 8;
+      --fg: 255 255 255;
+      --soft: 224 224 224;
+      --mute: 138 138 138;
+      --logo-invert: 0;
+      color-scheme: dark;
+    }
+    :root[data-theme="light"] {
+      --bg: 255 255 255;
+      --panel: 245 245 245;
+      --surface: 255 255 255;
+      --fg: 0 0 0;
+      --soft: 28 28 28;
+      --mute: 110 110 110;
+      --logo-invert: 1;
+      color-scheme: light;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: rgb(var(--bg));
+      color: rgb(var(--soft));
+      overflow-x: hidden;
+      transition: background-color .35s ease, color .35s ease;
+    }
+    ::selection { background: rgb(var(--fg) / .2); color: rgb(var(--fg)); }
+
+    /* The wordmark is drawn in white, so it inverts to stay legible on day mode. */
+    .logo-img { filter: invert(var(--logo-invert)); }
 
     /* Scroll-reveal */
     .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
@@ -48,23 +93,23 @@
     /* Glowing primary CTA (gradient border) */
     .cta-glow {
       position: relative;
-      background: linear-gradient(#000, #000) padding-box,
-                  linear-gradient(100deg, #ffffff, #6b6b6b 55%, #ffffff) border-box;
+      background: linear-gradient(rgb(var(--bg)), rgb(var(--bg))) padding-box,
+                  linear-gradient(100deg, rgb(var(--fg)), rgb(var(--mute)) 55%, rgb(var(--fg))) border-box;
       border: 1px solid transparent;
       transition: box-shadow .3s ease, transform .3s ease;
     }
-    .cta-glow:hover { box-shadow: 0 0 28px rgba(255,255,255,.28), inset 0 0 12px rgba(255,255,255,.08); transform: translateY(-1px); }
+    .cta-glow:hover { box-shadow: 0 0 28px rgb(var(--fg) / .28), inset 0 0 12px rgb(var(--fg) / .08); transform: translateY(-1px); }
 
     /* Product / news card hover */
     .sys-card { transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease; }
-    .sys-card:hover { transform: scale(1.02); border-color: rgba(255,255,255,.5); box-shadow: 0 0 32px rgba(255,255,255,.1); }
+    .sys-card:hover { transform: scale(1.02); border-color: rgb(var(--fg) / .5); box-shadow: 0 0 32px rgb(var(--fg) / .1); }
 
     /* Tech spotlight scan-line */
     @keyframes scan { 0% { top: -4%; } 100% { top: 104%; } }
     .scanline {
       position: absolute; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.85), transparent);
-      box-shadow: 0 0 18px 2px rgba(255,255,255,.35);
+      background: linear-gradient(90deg, transparent, rgb(var(--fg) / .85), transparent);
+      box-shadow: 0 0 18px 2px rgb(var(--fg) / .35);
       animation: scan 4.5s linear infinite;
     }
 
@@ -75,8 +120,8 @@
     }
     .grid-lines {
       background-image:
-        linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255,255,255,.07) 1px, transparent 1px);
+        linear-gradient(to right, rgb(var(--fg) / .07) 1px, transparent 1px),
+        linear-gradient(to bottom, rgb(var(--fg) / .07) 1px, transparent 1px);
       background-size: 72px 72px, 72px 72px;
       animation: grid-drift 14s linear infinite;
     }
@@ -90,44 +135,83 @@
       min-width: 64px; padding: 6px 12px; border-radius: 4px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
-      color: rgba(224,224,224,.6); transition: background .25s ease, color .25s ease;
+      color: rgb(var(--soft) / .6); transition: background .25s ease, color .25s ease;
     }
-    .model-tab:hover { color: #ffffff; }
-    .model-tab.is-active { background: rgba(255,255,255,.14); color: #ffffff; }
+    .model-tab:hover { color: rgb(var(--fg)); }
+    .model-tab.is-active { background: rgb(var(--fg) / .14); color: rgb(var(--fg)); }
 
     #explodeRange::-webkit-slider-thumb {
       -webkit-appearance: none; appearance: none;
       width: 14px; height: 14px; border-radius: 50%;
-      background: #ffffff; box-shadow: 0 0 10px rgba(255,255,255,.55); cursor: pointer;
+      background: rgb(var(--fg)); box-shadow: 0 0 10px rgb(var(--fg) / .55); cursor: pointer;
     }
     #explodeRange::-moz-range-thumb {
       width: 14px; height: 14px; border: 0; border-radius: 50%;
-      background: #ffffff; box-shadow: 0 0 10px rgba(255,255,255,.55); cursor: pointer;
+      background: rgb(var(--fg)); box-shadow: 0 0 10px rgb(var(--fg) / .55); cursor: pointer;
     }
     #explodeBar.is-disabled { opacity: .45; }
     #explodeBar.is-disabled #explodeRange { pointer-events: none; }
 
     /* Focus visibility */
     a:focus-visible, button:focus-visible, input:focus-visible {
-      outline: 2px solid #ffffff; outline-offset: 3px; border-radius: 2px;
+      outline: 2px solid rgb(var(--fg)); outline-offset: 3px; border-radius: 2px;
     }
+
+    /* Pill CTA with corner arrow */
+    .cta-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 999px;
+      background: rgb(var(--fg)); color: rgb(var(--bg));
+      font-size: 13px; font-weight: 600; letter-spacing: .02em;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .cta-pill:hover { opacity: .85; transform: translateY(-1px); }
+    .cta-pill svg { transition: transform .25s ease; }
+    .cta-pill:hover svg { transform: translate(2px, -2px); }
+
+    /* Theme toggle shows the mode you'd switch to */
+    .theme-toggle .icon-sun { display: block; }
+    .theme-toggle .icon-moon { display: none; }
+    :root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+    :root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
+
+    /* Day mode needs a heavier veil over the film for black type to hold up */
+    :root[data-theme="light"] .hero-scrim { background: rgb(var(--bg) / .8); }
+
+    /* ---- Capability index (category left, items right, hairline rules) ---- */
+    .cap-row {
+      display: grid; gap: 8px 48px;
+      padding: 28px 0;
+      border-top: 1px solid rgb(var(--fg) / .14);
+    }
+    @media (min-width: 768px) { .cap-row { grid-template-columns: 260px 1fr; } }
+    .cap-label {
+      font-size: 13px; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: rgb(var(--fg));
+    }
+    .cap-item {
+      display: block; padding: 6px 0;
+      font-size: 16px; color: rgb(var(--mute));
+      transition: color .2s ease, transform .2s ease;
+    }
+    .cap-item:hover { color: rgb(var(--fg)); transform: translateX(4px); }
 
     /* ---- Navbar: desktop mega-menu ---- */
     .nav-link {
       display: inline-flex; align-items: center; gap: 6px;
       height: 40px; padding: 0 14px; border-radius: 6px;
-      font-size: 13px; font-weight: 500; color: rgba(224,224,224,.72);
+      font-size: 13px; font-weight: 500; color: rgb(var(--soft) / .72);
       transition: background .2s ease, color .2s ease;
     }
-    .nav-link:hover, .nav-item[data-open="true"] > .nav-link { background: rgba(255,255,255,.07); color: #fff; }
+    .nav-link:hover, .nav-item[data-open="true"] > .nav-link { background: rgb(var(--fg) / .07); color: #fff; }
     .nav-item[data-open="true"] .nav-chev { transform: rotate(180deg); }
     .nav-chev { transition: transform .25s ease; }
 
     .mega {
       position: absolute; top: calc(100% + 6px); left: 0;
       width: 420px; padding: 10px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(8,8,8,.97);
+      border: 1px solid rgb(var(--fg) / .12);
+      background: rgb(var(--surface) / .97);
       border-radius: 10px;
       box-shadow: 0 24px 60px rgba(0,0,0,.85);
       opacity: 0; visibility: hidden; transform: translateY(-6px);
@@ -138,33 +222,33 @@
       display: flex; gap: 14px; padding: 12px; border-radius: 8px;
       transition: background .2s ease;
     }
-    .mega-item:hover { background: rgba(255,255,255,.07); }
+    .mega-item:hover { background: rgb(var(--fg) / .07); }
     .mega-item svg { flex-shrink: 0; margin-top: 2px; color: #fff; }
 
     /* ---- Search dialog ---- */
     .cmd-backdrop {
       position: fixed; inset: 0; z-index: 70;
-      background: rgba(0,0,0,.85); backdrop-filter: blur(4px);
+      background: rgb(var(--bg) / .85); backdrop-filter: blur(4px);
       display: none; align-items: flex-start; justify-content: center; padding: 12vh 16px 16px;
     }
     .cmd-backdrop.is-open { display: flex; }
     .cmd-panel {
       width: 100%; max-width: 560px; overflow: hidden;
-      border: 1px solid rgba(255,255,255,.14); border-radius: 12px;
-      background: #060606; box-shadow: 0 30px 80px rgba(0,0,0,.9);
+      border: 1px solid rgb(var(--fg) / .14); border-radius: 12px;
+      background: rgb(var(--surface)); box-shadow: 0 30px 80px rgba(0,0,0,.9);
     }
     .cmd-result {
       display: flex; align-items: center; gap: 12px;
       width: 100%; padding: 10px 14px; border-radius: 8px; text-align: left;
-      font-size: 14px; color: rgba(224,224,224,.85);
+      font-size: 14px; color: rgb(var(--soft) / .85);
       transition: background .15s ease, color .15s ease;
     }
-    .cmd-result:hover, .cmd-result.is-active { background: rgba(255,255,255,.1); color: #fff; }
+    .cmd-result:hover, .cmd-result.is-active { background: rgb(var(--fg) / .1); color: #fff; }
     .cmd-result svg { flex-shrink: 0; color: #8a8a8a; }
     .cmd-result:hover svg, .cmd-result.is-active svg { color: #fff; }
     kbd {
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px;
-      padding: 2px 6px; border: 1px solid rgba(255,255,255,.18);
+      padding: 2px 6px; border: 1px solid rgb(var(--fg) / .18);
       border-radius: 4px; color: #8a8a8a;
     }
 
@@ -172,13 +256,13 @@
     .sheet {
       position: fixed; inset: 0 0 0 auto; z-index: 60;
       width: min(88vw, 380px); padding: 24px 22px;
-      background: #050505; border-left: 1px solid rgba(255,255,255,.12);
+      background: rgb(var(--surface)); border-left: 1px solid rgb(var(--fg) / .12);
       transform: translateX(100%); transition: transform .32s cubic-bezier(.4,0,.2,1);
       overflow-y: auto;
     }
     .sheet.is-open { transform: none; }
     .sheet-scrim {
-      position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,.7);
+      position: fixed; inset: 0; z-index: 55; background: rgb(var(--bg) / .7);
       opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s;
     }
     .sheet-scrim.is-open { opacity: 1; visibility: visible; }
@@ -213,7 +297,7 @@
   <header id="navbar" class="fixed inset-x-0 top-0 z-50 transition-all duration-300">
     <nav class="mx-auto flex h-20 max-w-7xl items-center justify-between px-6" aria-label="Main">
       <a href="#top" class="flex shrink-0 items-center" aria-label="Spatial Defence — home">
-        <img src="assets/logo-lockup.png" alt="Spatial Defence" class="no-gray h-8 w-auto sm:h-9">
+        <img src="assets/logo-lockup.png" alt="Spatial Defence" class="logo-img h-8 w-auto sm:h-9">
       </a>
 
       <!-- Desktop menu -->
@@ -229,21 +313,21 @@
             <a href="#systems" class="mega-item" role="menuitem">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2l9 19-9-5-9 5 9-19z"/></svg>
               <span>
-                <span class="block text-sm font-semibold text-white">Hawk 1</span>
+                <span class="block text-sm font-semibold text-fg">Hawk 1</span>
                 <span class="mt-0.5 block text-xs leading-snug text-soft/55">VTOL airframe with fixed-wing cruise — no runway required</span>
               </span>
             </a>
             <a href="#systems" class="mega-item" role="menuitem">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/></svg>
               <span>
-                <span class="block text-sm font-semibold text-white">Power Unit</span>
+                <span class="block text-sm font-semibold text-fg">Power Unit</span>
                 <span class="mt-0.5 block text-xs leading-snug text-soft/55">In-house propulsion, bench-tested for thrust and endurance</span>
               </span>
             </a>
             <a href="#systems" class="mega-item" role="menuitem">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               <span>
-                <span class="block text-sm font-semibold text-white">Aegis Core</span>
+                <span class="block text-sm font-semibold text-fg">Aegis Core</span>
                 <span class="mt-0.5 block text-xs leading-snug text-soft/55">Autonomous interception — detect, track, neutralise</span>
               </span>
             </a>
@@ -259,21 +343,21 @@
             <a href="#technology" class="mega-item" role="menuitem">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
               <span>
-                <span class="block text-sm font-semibold text-white">Onboard autonomy</span>
+                <span class="block text-sm font-semibold text-fg">Onboard autonomy</span>
                 <span class="mt-0.5 block text-xs leading-snug text-soft/55">Flies through jamming and GPS denial, decides in milliseconds</span>
               </span>
             </a>
             <a href="#technology" class="mega-item" role="menuitem">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/><path d="M12 12l9-5M12 12v10M12 12L3 7"/></svg>
               <span>
-                <span class="block text-sm font-semibold text-white">3D airframe viewer</span>
+                <span class="block text-sm font-semibold text-fg">3D airframe viewer</span>
                 <span class="mt-0.5 block text-xs leading-snug text-soft/55">Rotate, zoom, and take the assembly apart in the browser</span>
               </span>
             </a>
             <a href="#engineering" class="mega-item" role="menuitem">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
               <span>
-                <span class="block text-sm font-semibold text-white">Engineering pipeline</span>
+                <span class="block text-sm font-semibold text-fg">Engineering pipeline</span>
                 <span class="mt-0.5 block text-xs leading-snug text-soft/55">CAD, CFD, and flight dynamics behind every airframe</span>
               </span>
             </a>
@@ -286,17 +370,26 @@
 
       <!-- Desktop actions -->
       <div class="hidden items-center gap-2 lg:flex">
-        <button type="button" class="search-open flex h-10 w-10 items-center justify-center rounded-md text-soft/70 transition hover:bg-white/8 hover:text-white" aria-label="Search">
+        <button type="button" class="search-open flex h-10 w-10 items-center justify-center rounded-md text-soft/70 transition hover:bg-fg/8 hover:text-fg" aria-label="Search">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         </button>
-        <a href="tel:+99899494012" class="cta-glow ml-1 rounded-md px-5 py-2.5 text-sm font-semibold text-white">
+        <button type="button" class="theme-toggle flex h-10 w-10 items-center justify-center rounded-md text-soft/70 transition hover:bg-fg/8 hover:text-fg" aria-label="Switch to day mode">
+          <svg class="icon-sun h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        </button>
+        <a href="tel:+99899494012" class="cta-pill ml-1">
           +998 99 49 40 12
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
         </a>
       </div>
 
       <!-- Mobile actions -->
       <div class="flex items-center gap-1 lg:hidden">
-        <button type="button" class="search-open flex h-11 w-11 items-center justify-center rounded-md text-soft/70 transition hover:text-white" aria-label="Search">
+        <button type="button" class="theme-toggle flex h-11 w-11 items-center justify-center rounded-md text-soft/70 transition hover:text-fg" aria-label="Switch to day mode">
+          <svg class="icon-sun h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="icon-moon h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        </button>
+        <button type="button" class="search-open flex h-11 w-11 items-center justify-center rounded-md text-soft/70 transition hover:text-fg" aria-label="Search">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         </button>
         <button id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileSheet"
@@ -313,57 +406,57 @@
   <div id="sheetScrim" class="sheet-scrim lg:hidden"></div>
   <aside id="mobileSheet" class="sheet lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
     <div class="mb-8 flex items-center justify-between">
-      <img src="assets/logo-lockup.png" alt="Spatial Defence" class="no-gray h-7 w-auto">
+      <img src="assets/logo-lockup.png" alt="Spatial Defence" class="logo-img h-7 w-auto">
       <button id="sheetClose" aria-label="Close menu"
-              class="flex h-10 w-10 items-center justify-center rounded-md border border-white/15 text-white transition hover:border-white/40">
+              class="flex h-10 w-10 items-center justify-center rounded-md border border-fg/15 text-fg transition hover:border-fg/40">
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
 
     <nav class="flex flex-col" aria-label="Mobile">
-      <a href="#top" class="sheet-link border-b border-white/10 py-4 text-base font-semibold text-white">Home</a>
+      <a href="#top" class="sheet-link border-b border-fg/10 py-4 text-base font-semibold text-fg">Home</a>
 
-      <div class="acc border-b border-white/10" data-open="false">
-        <button type="button" class="acc-trigger flex w-full items-center justify-between py-4 text-base font-semibold text-white" aria-expanded="false">
+      <div class="acc border-b border-fg/10" data-open="false">
+        <button type="button" class="acc-trigger flex w-full items-center justify-between py-4 text-base font-semibold text-fg" aria-expanded="false">
           Systems
           <svg class="acc-chev h-4 w-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="acc-panel"><div class="pb-3">
-          <a href="#systems" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-white/5 hover:text-white">Hawk 1 — VTOL airframe</a>
-          <a href="#systems" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-white/5 hover:text-white">Power Unit — propulsion</a>
-          <a href="#systems" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-white/5 hover:text-white">Aegis Core — interception</a>
+          <a href="#systems" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-fg/5 hover:text-fg">Hawk 1 — VTOL airframe</a>
+          <a href="#systems" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-fg/5 hover:text-fg">Power Unit — propulsion</a>
+          <a href="#systems" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-fg/5 hover:text-fg">Aegis Core — interception</a>
         </div></div>
       </div>
 
-      <div class="acc border-b border-white/10" data-open="false">
-        <button type="button" class="acc-trigger flex w-full items-center justify-between py-4 text-base font-semibold text-white" aria-expanded="false">
+      <div class="acc border-b border-fg/10" data-open="false">
+        <button type="button" class="acc-trigger flex w-full items-center justify-between py-4 text-base font-semibold text-fg" aria-expanded="false">
           Technology
           <svg class="acc-chev h-4 w-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="acc-panel"><div class="pb-3">
-          <a href="#technology" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-white/5 hover:text-white">Onboard autonomy</a>
-          <a href="#technology" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-white/5 hover:text-white">3D airframe viewer</a>
-          <a href="#engineering" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-white/5 hover:text-white">Engineering pipeline</a>
+          <a href="#technology" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-fg/5 hover:text-fg">Onboard autonomy</a>
+          <a href="#technology" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-fg/5 hover:text-fg">3D airframe viewer</a>
+          <a href="#engineering" class="sheet-link block rounded-md px-3 py-3 text-sm text-soft/70 transition hover:bg-fg/5 hover:text-fg">Engineering pipeline</a>
         </div></div>
       </div>
 
-      <a href="#news" class="sheet-link border-b border-white/10 py-4 text-base font-semibold text-white">News</a>
-      <a href="#careers" class="sheet-link border-b border-white/10 py-4 text-base font-semibold text-white">Careers</a>
+      <a href="#news" class="sheet-link border-b border-fg/10 py-4 text-base font-semibold text-fg">News</a>
+      <a href="#careers" class="sheet-link border-b border-fg/10 py-4 text-base font-semibold text-fg">Careers</a>
     </nav>
 
-    <div class="mt-6 grid grid-cols-2 gap-1 border-b border-white/10 pb-6">
-      <a href="https://t.me/PVsyst_tahlili" target="_blank" rel="noopener" class="rounded-md px-3 py-2.5 text-sm text-soft/60 transition hover:text-white">PVsyst Tahlili</a>
-      <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener" class="rounded-md px-3 py-2.5 text-sm text-soft/60 transition hover:text-white">Founder</a>
-      <a href="#news" class="sheet-link rounded-md px-3 py-2.5 text-sm text-soft/60 transition hover:text-white">Press</a>
-      <a href="#contact" class="sheet-link rounded-md px-3 py-2.5 text-sm text-soft/60 transition hover:text-white">Contact</a>
+    <div class="mt-6 grid grid-cols-2 gap-1 border-b border-fg/10 pb-6">
+      <a href="https://t.me/PVsyst_tahlili" target="_blank" rel="noopener" class="rounded-md px-3 py-2.5 text-sm text-soft/60 transition hover:text-fg">PVsyst Tahlili</a>
+      <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener" class="rounded-md px-3 py-2.5 text-sm text-soft/60 transition hover:text-fg">Founder</a>
+      <a href="#news" class="sheet-link rounded-md px-3 py-2.5 text-sm text-soft/60 transition hover:text-fg">Press</a>
+      <a href="#contact" class="sheet-link rounded-md px-3 py-2.5 text-sm text-soft/60 transition hover:text-fg">Contact</a>
     </div>
 
     <div class="mt-6 flex flex-col gap-3">
       <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener"
-         class="rounded-md border border-white/20 px-5 py-3 text-center text-sm font-semibold text-white transition hover:border-white/50">
+         class="rounded-md border border-fg/20 px-5 py-3 text-center text-sm font-semibold text-fg transition hover:border-fg/50">
         Book a Demo
       </a>
-      <a href="tel:+99899494012" class="cta-glow rounded-md px-5 py-3 text-center text-sm font-semibold text-white">
+      <a href="tel:+99899494012" class="cta-glow rounded-md px-5 py-3 text-center text-sm font-semibold text-fg">
         +998 99 49 40 12
       </a>
     </div>
@@ -372,10 +465,10 @@
   <!-- Search dialog -->
   <div id="cmdBackdrop" class="cmd-backdrop" role="dialog" aria-modal="true" aria-label="Search">
     <div class="cmd-panel">
-      <div class="flex items-center gap-3 border-b border-white/12 px-5">
+      <div class="flex items-center gap-3 border-b border-fg/12 px-5">
         <svg class="h-4 w-4 shrink-0 text-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <input id="cmdInput" type="text" placeholder="Search systems, technology, news…" autocomplete="off"
-               class="h-12 w-full bg-transparent text-sm text-white placeholder:text-mute focus:outline-none">
+               class="h-12 w-full bg-transparent text-sm text-fg placeholder:text-mute focus:outline-none">
         <kbd class="shrink-0">ESC</kbd>
       </div>
       <div id="cmdList" class="max-h-80 overflow-y-auto p-2"></div>
@@ -390,7 +483,7 @@
         <video src="assets/hero-bg.mp4" autoplay muted loop playsinline preload="metadata"
                class="bg-video absolute inset-0 h-full w-full object-cover"></video>
       </div>
-      <div class="pointer-events-none absolute inset-0 bg-ink/62"></div>
+      <div class="hero-scrim pointer-events-none absolute inset-0 bg-ink/62"></div>
       <div class="grid-lines grid-fade pointer-events-none absolute inset-0" aria-hidden="true"></div>
       <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/50 via-transparent to-ink"></div>
 
@@ -398,9 +491,9 @@
         <p class="reveal mb-4 text-[10px] font-semibold uppercase tracking-[0.3em] text-mute">
           Autonomous Aerial Systems &middot; Tashkent, Uzbekistan
         </p>
-        <h1 class="reveal max-w-3xl text-3xl font-light leading-[1.05] tracking-tight text-white sm:text-4xl lg:text-6xl" style="transition-delay:.08s">
+        <h1 class="reveal max-w-3xl text-3xl font-light leading-[1.05] tracking-tight text-fg sm:text-4xl lg:text-6xl" style="transition-delay:.08s">
           Autonomous security.<br>
-          <span class="bg-gradient-to-r from-white via-white to-mute bg-clip-text text-transparent">Unthinkable speed.</span>
+          <span class="bg-gradient-to-r from-fg via-fg to-mute bg-clip-text text-transparent">Unthinkable speed.</span>
         </h1>
         <p class="reveal mt-5 max-w-lg text-sm leading-relaxed text-soft/80 sm:text-base" style="transition-delay:.16s">
           Spatial Defence builds AI-piloted aircraft that detect, decide, and act in seconds —
@@ -408,7 +501,7 @@
         </p>
         <div class="reveal mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center" style="transition-delay:.24s">
           <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener"
-             class="cta-glow rounded-md px-6 py-3 text-sm font-semibold text-white">
+             class="cta-glow rounded-md px-6 py-3 text-sm font-semibold text-fg">
             Book a Demo
           </a>
           <a href="https://youtu.be/OnpuNlE3UxU" target="_blank" rel="noopener"
@@ -426,11 +519,58 @@
       </div>
     </section>
 
+    <!-- ======================= CAPABILITY INDEX ======================= -->
+    <section id="capabilities" class="scroll-mt-24 py-20 lg:py-28">
+      <div class="mx-auto max-w-7xl px-6">
+        <div class="reveal mb-12 grid gap-6 md:grid-cols-[260px_1fr] md:gap-12">
+          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-mute">What we do</p>
+          <p class="max-w-xl text-base leading-relaxed text-soft/75">
+            We design, simulate, build, and fly autonomous aircraft in-house — from the first
+            parametric surface to the aircraft that comes back from the range.
+          </p>
+        </div>
+
+        <div class="reveal cap-row">
+          <p class="cap-label">Airframe<br>Engineering</p>
+          <div>
+            <a href="#technology" class="cap-item">Parametric CAD and digital twins</a>
+            <a href="#engineering" class="cap-item">CFD and aerodynamic validation</a>
+            <a href="#engineering" class="cap-item">Flight dynamics and stability sweeps</a>
+            <a href="#systems" class="cap-item">VTOL transition and fixed-wing cruise</a>
+            <a href="#technology" class="cap-item">Composite airframe fabrication</a>
+          </div>
+        </div>
+
+        <div class="reveal cap-row" style="transition-delay:.06s">
+          <p class="cap-label">Autonomy &amp;<br>Avionics</p>
+          <div>
+            <a href="#technology" class="cap-item">Onboard target classification</a>
+            <a href="#technology" class="cap-item">GPS-denied and jam-resistant navigation</a>
+            <a href="#systems" class="cap-item">Autonomous interception</a>
+            <a href="#technology" class="cap-item">Fleet command with a single operator</a>
+            <a href="#technology" class="cap-item">Human-in-the-loop decision control</a>
+          </div>
+        </div>
+
+        <div class="reveal cap-row" style="transition-delay:.12s">
+          <p class="cap-label">Propulsion &amp;<br>Test</p>
+          <div>
+            <a href="#systems" class="cap-item">In-house power units</a>
+            <a href="#systems" class="cap-item">Thrust and endurance bench testing</a>
+            <a href="#engineering" class="cap-item">Instrumented flight-test campaigns</a>
+            <a href="#engineering" class="cap-item">Field trials on the Tashkent range</a>
+          </div>
+        </div>
+
+        <div class="reveal cap-row !py-0" style="transition-delay:.18s"></div>
+      </div>
+    </section>
+
     <!-- ======================= MISSION / MANIFESTO ======================= -->
     <section class="relative py-24 lg:py-32">
       <div class="reveal mx-auto max-w-4xl px-6 text-center">
         <div class="mx-auto mb-10 h-px w-24 bg-gradient-to-r from-transparent via-accent to-transparent"></div>
-        <blockquote class="text-3xl font-bold leading-snug text-white sm:text-4xl lg:text-5xl">
+        <blockquote class="text-3xl font-bold leading-snug text-fg sm:text-4xl lg:text-5xl">
           “We are building the decisive edge for modern defence.”
         </blockquote>
         <p class="mt-8 text-sm font-semibold uppercase tracking-[0.3em] text-soft/50">
@@ -445,7 +585,7 @@
         <div class="reveal mb-14 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p class="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-mute">Product Line</p>
-            <h2 class="text-4xl font-extrabold tracking-tight text-white lg:text-5xl">Explore our systems</h2>
+            <h2 class="text-4xl font-extrabold tracking-tight text-fg lg:text-5xl">Explore our systems</h2>
           </div>
           <p class="max-w-sm text-sm leading-relaxed text-soft/60">
             A family of autonomous aircraft and the intelligence layer that binds them into one force.
@@ -454,7 +594,7 @@
 
         <div class="grid grid-cols-2 gap-5 lg:grid-cols-3 lg:gap-7">
           <!-- Card 1 -->
-          <article class="reveal sys-card group overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg">
+          <article class="reveal sys-card group overflow-hidden rounded-xl border border-fg/10 bg-fg/5 backdrop-blur-lg">
             <div id="hawk1Media" class="relative aspect-[16/10] cursor-pointer overflow-hidden">
               <img src="assets/hawk1-prototype.jpg"
                    alt="Hawk 1 flying-wing VTOL prototype with four lift rotors" loading="lazy"
@@ -463,7 +603,7 @@
               <span class="absolute left-4 top-4 rounded border border-accent/40 bg-ink/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">VTOL &middot; Prototype</span>
             </div>
             <div class="p-5 lg:p-6">
-              <h3 class="text-xl font-bold text-white lg:text-2xl">Hawk 1</h3>
+              <h3 class="text-xl font-bold text-fg lg:text-2xl">Hawk 1</h3>
               <p class="mt-2 text-sm leading-relaxed text-soft/70">
                 A unique combination of vertical take-off and fixed-wing cruise — no runway, no compromise on range.
               </p>
@@ -474,7 +614,7 @@
           </article>
 
           <!-- Card 2 -->
-          <article class="reveal sys-card group overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg" style="transition-delay:.1s">
+          <article class="reveal sys-card group overflow-hidden rounded-xl border border-fg/10 bg-fg/5 backdrop-blur-lg" style="transition-delay:.1s">
             <div id="powerUnitMedia" class="relative aspect-[16/10] cursor-pointer overflow-hidden">
               <video src="assets/power-unit.mp4" autoplay muted loop playsinline preload="metadata"
                      aria-label="Bench test of the Spatial Defence power unit"
@@ -483,7 +623,7 @@
               <span class="absolute left-4 top-4 rounded border border-accent/40 bg-ink/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Power units</span>
             </div>
             <div class="p-5 lg:p-6">
-              <h3 class="text-xl font-bold text-white lg:text-2xl">Power Unit</h3>
+              <h3 class="text-xl font-bold text-fg lg:text-2xl">Power Unit</h3>
               <p class="mt-2 text-sm leading-relaxed text-soft/70">
                 In-house propulsion for Hawk-class airframes — bench-tested for thrust, endurance, and reliability.
               </p>
@@ -494,7 +634,7 @@
           </article>
 
           <!-- Card 3 -->
-          <article class="reveal sys-card group overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg lg:col-auto col-span-2 lg:col-span-1" style="transition-delay:.2s">
+          <article class="reveal sys-card group overflow-hidden rounded-xl border border-fg/10 bg-fg/5 backdrop-blur-lg lg:col-auto col-span-2 lg:col-span-1" style="transition-delay:.2s">
             <div id="interceptionMedia" class="relative aspect-[16/10] cursor-pointer overflow-hidden">
               <video src="assets/interception.mp4" autoplay muted loop playsinline preload="metadata"
                      aria-label="Autonomous interception flight test"
@@ -503,7 +643,7 @@
               <span class="absolute left-4 top-4 rounded border border-accent/40 bg-ink/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Interception</span>
             </div>
             <div class="p-5 lg:p-6">
-              <h3 class="text-xl font-bold text-white lg:text-2xl">Aegis Core</h3>
+              <h3 class="text-xl font-bold text-fg lg:text-2xl">Aegis Core</h3>
               <p class="mt-2 text-sm leading-relaxed text-soft/70">
                 Autonomous aerial interception — detect, track, and neutralise hostile drones before they reach the perimeter.
               </p>
@@ -521,7 +661,7 @@
       <div class="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20">
         <div class="reveal">
           <p class="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-mute">Core Technology</p>
-          <h2 class="text-4xl font-extrabold leading-tight tracking-tight text-white lg:text-5xl">
+          <h2 class="text-4xl font-extrabold leading-tight tracking-tight text-fg lg:text-5xl">
             AI-powered <br>self-deciding drones
           </h2>
           <p class="mt-7 text-base leading-relaxed text-soft/75 lg:text-lg">
@@ -539,25 +679,25 @@
           </a>
         </div>
 
-        <div class="reveal relative overflow-hidden rounded-xl border border-white/10 bg-[#050505]" style="transition-delay:.12s">
+        <div class="reveal relative overflow-hidden rounded-xl border border-fg/10 bg-panel" style="transition-delay:.12s">
           <div id="uavViewer" class="aspect-[4/5] w-full touch-none sm:aspect-[16/12]"
                aria-label="Interactive 3D model viewer. Drag to rotate, scroll or pinch to zoom."></div>
 
           <!-- Model selector -->
-          <div class="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 gap-1 rounded-md border border-white/10 bg-ink/85 p-1 backdrop-blur"
+          <div class="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 gap-1 rounded-md border border-fg/10 bg-ink/85 p-1 backdrop-blur"
                role="tablist" aria-label="Select aircraft model">
             <button type="button" class="model-tab" data-model="uav1" role="tab" aria-selected="false">UAV 1</button>
             <button type="button" class="model-tab is-active" data-model="uav2" role="tab" aria-selected="true">UAV 2</button>
           </div>
 
           <!-- Assemble / explode control -->
-          <div id="explodeBar" class="absolute inset-x-14 bottom-5 z-10 rounded-md border border-white/10 bg-ink/85 px-4 py-2.5 backdrop-blur">
+          <div id="explodeBar" class="absolute inset-x-14 bottom-5 z-10 rounded-md border border-fg/10 bg-ink/85 px-4 py-2.5 backdrop-blur">
             <div class="flex items-center gap-3">
               <label for="explodeRange" class="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-accent/90">
                 Assemble
               </label>
               <input id="explodeRange" type="range" min="0" max="100" value="0" step="1"
-                     class="h-1 w-full flex-1 cursor-pointer appearance-none rounded bg-white/15 accent-accent"
+                     class="h-1 w-full flex-1 cursor-pointer appearance-none rounded bg-fg/15 accent-accent"
                      aria-label="Assemble to exploded view">
               <label for="explodeRange" class="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-accent/90">
                 Explode
@@ -582,7 +722,7 @@
       <div class="mx-auto max-w-7xl px-6">
         <div class="reveal mb-14 max-w-2xl">
           <p class="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-mute">Engineering</p>
-          <h2 class="text-4xl font-extrabold tracking-tight text-white lg:text-5xl">Designed. Simulated. Flown.</h2>
+          <h2 class="text-4xl font-extrabold tracking-tight text-fg lg:text-5xl">Designed. Simulated. Flown.</h2>
           <p class="mt-5 text-base leading-relaxed text-soft/70">
             Every Spatial Defence airframe follows the same discipline: a parametric CAD twin, aerodynamics
             proven in simulation, then real hardware on the test range.
@@ -590,13 +730,13 @@
         </div>
 
         <div class="grid gap-6 lg:grid-cols-3">
-          <figure class="reveal sys-card overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
+          <figure class="reveal sys-card overflow-hidden rounded-xl border border-fg/10 bg-fg/[0.03]">
             <video src="assets/cad-animation.mp4" autoplay muted loop playsinline preload="metadata"
                    aria-label="CAD animation of the Hawk 1 airframe assembly"
                    class="aspect-video w-full object-cover"></video>
             <figcaption class="p-5 lg:p-6">
               <p class="font-mono text-xs uppercase tracking-widest text-mute">01 · Airframe CAD</p>
-              <h3 class="mt-2 text-lg font-bold text-white">Parametric digital twin</h3>
+              <h3 class="mt-2 text-lg font-bold text-fg">Parametric digital twin</h3>
               <p class="mt-2 text-sm leading-relaxed text-soft/60">
                 The full assembly is modelled part by part, so every structural change is verified before a
                 single component is cut.
@@ -604,13 +744,13 @@
             </figcaption>
           </figure>
 
-          <figure class="reveal sys-card overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]" style="transition-delay:.1s">
+          <figure class="reveal sys-card overflow-hidden rounded-xl border border-fg/10 bg-fg/[0.03]" style="transition-delay:.1s">
             <video src="assets/cfd-analysis.mp4" autoplay muted loop playsinline preload="metadata"
                    aria-label="CFD airflow simulation over the flying wing"
                    class="aspect-video w-full object-cover"></video>
             <figcaption class="p-5 lg:p-6">
               <p class="font-mono text-xs uppercase tracking-widest text-mute">02 · CFD Validation</p>
-              <h3 class="mt-2 text-lg font-bold text-white">Aerodynamics proven before flight</h3>
+              <h3 class="mt-2 text-lg font-bold text-fg">Aerodynamics proven before flight</h3>
               <p class="mt-2 text-sm leading-relaxed text-soft/60">
                 Computational fluid dynamics maps pressure and flow across the flying wing, tuning lift and
                 stability at cruise.
@@ -618,13 +758,13 @@
             </figcaption>
           </figure>
 
-          <figure id="simFigure" class="reveal sys-card overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]" style="transition-delay:.2s">
+          <figure id="simFigure" class="reveal sys-card overflow-hidden rounded-xl border border-fg/10 bg-fg/[0.03]" style="transition-delay:.2s">
             <video src="assets/sim-run.mp4" autoplay muted loop playsinline preload="metadata"
                    aria-label="Flight dynamics simulation sweeping the UAV 2 through its envelope"
                    class="aspect-video w-full bg-white object-cover"></video>
             <figcaption class="p-5 lg:p-6">
               <p class="font-mono text-xs uppercase tracking-widest text-mute">03 · Flight Dynamics</p>
-              <h3 class="mt-2 text-lg font-bold text-white">Stability solved before first flight</h3>
+              <h3 class="mt-2 text-lg font-bold text-fg">Stability solved before first flight</h3>
               <p class="mt-2 text-sm leading-relaxed text-soft/60">
                 Lift distribution and stability are swept across the flight envelope — then confirmed in the
                 air by the Hawk 1 prototype.
@@ -636,28 +776,28 @@
     </section>
 
     <!-- ======================= CAPABILITY HIGHLIGHTS (STATS) ======================= -->
-    <section class="border-y border-white/10 bg-ink py-16 lg:py-20">
+    <section class="border-y border-fg/10 bg-ink py-16 lg:py-20">
       <div class="mx-auto grid max-w-7xl grid-cols-2 gap-10 px-6 text-center md:grid-cols-4">
         <div class="reveal">
-          <p class="text-4xl font-black text-white lg:text-5xl">
+          <p class="text-4xl font-black text-fg lg:text-5xl">
             <span class="stat" data-target="99.8" data-decimals="1">0</span><span class="text-accent">%</span>
           </p>
           <p class="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-soft/50">Detection rate</p>
         </div>
         <div class="reveal" style="transition-delay:.08s">
-          <p class="text-4xl font-black text-white lg:text-5xl">
+          <p class="text-4xl font-black text-fg lg:text-5xl">
             <span class="text-accent">&lt;</span><span class="stat" data-target="2">0</span>s
           </p>
           <p class="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-soft/50">Response time</p>
         </div>
         <div class="reveal" style="transition-delay:.16s">
-          <p class="text-4xl font-black text-white lg:text-5xl">
+          <p class="text-4xl font-black text-fg lg:text-5xl">
             <span class="stat" data-target="50">0</span><span class="text-accent">+</span>
           </p>
           <p class="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-soft/50">Installations</p>
         </div>
         <div class="reveal" style="transition-delay:.24s">
-          <p class="text-4xl font-black text-white lg:text-5xl">
+          <p class="text-4xl font-black text-fg lg:text-5xl">
             <span class="stat" data-target="24">0</span><span class="text-accent">/7</span>
           </p>
           <p class="mt-2 text-xs font-semibold uppercase tracking-[0.25em] text-soft/50">Autonomous watch</p>
@@ -674,13 +814,13 @@
       <div class="relative z-10 mx-auto max-w-7xl px-6">
         <div class="reveal mb-14">
           <p class="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-mute">Insights</p>
-          <h2 class="text-4xl font-extrabold tracking-tight text-white lg:text-5xl">Latest news</h2>
+          <h2 class="text-4xl font-extrabold tracking-tight text-fg lg:text-5xl">Latest news</h2>
         </div>
 
         <div class="grid gap-6 md:grid-cols-3">
-          <article class="reveal sys-card rounded-xl border border-white/10 bg-white/[0.03] p-6 lg:p-7">
+          <article class="reveal sys-card rounded-xl border border-fg/10 bg-fg/[0.03] p-6 lg:p-7">
             <time datetime="2025-11-18" class="font-mono text-xs uppercase tracking-widest text-mute">Nov 18, 2025</time>
-            <h3 class="mt-3 text-lg font-bold leading-snug text-white">
+            <h3 class="mt-3 text-lg font-bold leading-snug text-fg">
               Hawk 1 completes 400 km fully autonomous flight trial
             </h3>
             <p class="mt-3 text-sm leading-relaxed text-soft/60">
@@ -689,9 +829,9 @@
             <a href="#" class="mt-5 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent">Read more <span aria-hidden="true">→</span></a>
           </article>
 
-          <article class="reveal sys-card rounded-xl border border-white/10 bg-white/[0.03] p-6 lg:p-7" style="transition-delay:.1s">
+          <article class="reveal sys-card rounded-xl border border-fg/10 bg-fg/[0.03] p-6 lg:p-7" style="transition-delay:.1s">
             <time datetime="2025-09-02" class="font-mono text-xs uppercase tracking-widest text-mute">Sep 02, 2025</time>
-            <h3 class="mt-3 text-lg font-bold leading-snug text-white">
+            <h3 class="mt-3 text-lg font-bold leading-snug text-fg">
               Aegis Core selected for critical-infrastructure pilot programme
             </h3>
             <p class="mt-3 text-sm leading-relaxed text-soft/60">
@@ -700,9 +840,9 @@
             <a href="#" class="mt-5 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent">Read more <span aria-hidden="true">→</span></a>
           </article>
 
-          <article class="reveal sys-card rounded-xl border border-white/10 bg-white/[0.03] p-6 lg:p-7" style="transition-delay:.2s">
+          <article class="reveal sys-card rounded-xl border border-fg/10 bg-fg/[0.03] p-6 lg:p-7" style="transition-delay:.2s">
             <time datetime="2025-06-27" class="font-mono text-xs uppercase tracking-widest text-mute">Jun 27, 2025</time>
-            <h3 class="mt-3 text-lg font-bold leading-snug text-white">
+            <h3 class="mt-3 text-lg font-bold leading-snug text-fg">
               Spatial Defence opens flight-test facility near Tashkent
             </h3>
             <p class="mt-3 text-sm leading-relaxed text-soft/60">
@@ -718,13 +858,13 @@
     <section id="careers" class="scroll-mt-24 relative overflow-hidden bg-panel">
       <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent" aria-hidden="true"></div>
       <div class="reveal mx-auto max-w-4xl px-6 py-24 text-center lg:py-28">
-        <h2 class="text-4xl font-extrabold tracking-tight text-white lg:text-6xl">Join the mission</h2>
+        <h2 class="text-4xl font-extrabold tracking-tight text-fg lg:text-6xl">Join the mission</h2>
         <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-soft/70">
           We are a small team solving hard problems in autonomy, flight, and AI — and every engineer here ships
           hardware that flies.
         </p>
         <a href="https://t.me/Ismoilov020112" target="_blank" rel="noopener"
-           class="cta-glow mt-10 inline-block rounded-md px-10 py-4 text-base font-semibold text-white">
+           class="cta-glow mt-10 inline-block rounded-md px-10 py-4 text-base font-semibold text-fg">
           View Open Roles
         </a>
       </div>
@@ -737,7 +877,7 @@
         <div class="flex flex-col items-center justify-between gap-10 md:flex-row md:items-start">
           <div class="text-center md:text-left">
             <img src="assets/logo-lockup.png" alt="Spatial Defence"
-                 class="no-gray mx-auto h-8 w-auto md:mx-0">
+                 class="logo-img mx-auto h-8 w-auto md:mx-0">
             <p class="mt-4 text-sm text-soft/50">© 2026 Spatial Defence. All rights reserved.</p>
             <p class="mt-1 text-sm text-soft/50">Founded by Ismoilov Ibrohim</p>
           </div>
@@ -750,16 +890,16 @@
 
           <div class="flex flex-col items-center gap-5 md:items-end">
             <div class="flex gap-4 font-mono text-sm">
-              <a href="#" aria-label="LinkedIn" class="flex h-11 w-11 items-center justify-center rounded border border-white/10 text-soft/60 transition hover:border-accent/50 hover:text-accent">in</a>
-              <a href="#" aria-label="Twitter / X" class="flex h-11 w-11 items-center justify-center rounded border border-white/10 text-soft/60 transition hover:border-accent/50 hover:text-accent">tw</a>
-              <a href="#" aria-label="GitHub" class="flex h-11 w-11 items-center justify-center rounded border border-white/10 text-soft/60 transition hover:border-accent/50 hover:text-accent">gh</a>
+              <a href="#" aria-label="LinkedIn" class="flex h-11 w-11 items-center justify-center rounded border border-fg/10 text-soft/60 transition hover:border-accent/50 hover:text-accent">in</a>
+              <a href="#" aria-label="Twitter / X" class="flex h-11 w-11 items-center justify-center rounded border border-fg/10 text-soft/60 transition hover:border-accent/50 hover:text-accent">tw</a>
+              <a href="#" aria-label="GitHub" class="flex h-11 w-11 items-center justify-center rounded border border-fg/10 text-soft/60 transition hover:border-accent/50 hover:text-accent">gh</a>
             </div>
             <form class="flex w-full max-w-xs" onsubmit="return false" aria-label="Subscribe to updates">
               <label for="subEmail" class="sr-only">Email address</label>
               <input id="subEmail" type="email" placeholder="you@company.com" autocomplete="email"
-                     class="h-11 w-full rounded-l-md border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-soft/40 focus:border-accent/60 focus:outline-none">
+                     class="h-11 w-full rounded-l-md border border-fg/10 bg-fg/5 px-4 text-sm text-fg placeholder:text-soft/40 focus:border-accent/60 focus:outline-none">
               <button type="submit"
-                      class="h-11 rounded-r-md border border-l-0 border-white/10 bg-accent/10 px-4 text-sm font-semibold text-accent transition hover:bg-accent/20">
+                      class="h-11 rounded-r-md border border-l-0 border-fg/10 bg-accent/10 px-4 text-sm font-semibold text-accent transition hover:bg-accent/20">
                 Subscribe
               </button>
             </form>
@@ -773,13 +913,13 @@
   <div id="lightbox" class="fixed inset-0 z-[60] hidden items-center justify-center bg-ink/95 p-4 backdrop-blur-sm"
        role="dialog" aria-modal="true" aria-label="Media viewer">
     <button id="lbClose" aria-label="Close viewer"
-            class="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded border border-white/20 text-2xl leading-none text-white transition hover:border-accent hover:text-accent">&times;</button>
+            class="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded border border-fg/20 text-2xl leading-none text-fg transition hover:border-accent hover:text-accent">&times;</button>
     <button id="lbPrev" aria-label="Previous"
-            class="absolute left-2 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded border border-white/20 bg-ink/70 text-xl leading-none text-white transition hover:border-accent hover:text-accent sm:left-6">&#8249;</button>
+            class="absolute left-2 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded border border-fg/20 bg-ink/70 text-xl leading-none text-fg transition hover:border-accent hover:text-accent sm:left-6">&#8249;</button>
     <button id="lbNext" aria-label="Next"
-            class="absolute right-2 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded border border-white/20 bg-ink/70 text-xl leading-none text-white transition hover:border-accent hover:text-accent sm:right-6">&#8250;</button>
+            class="absolute right-2 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded border border-fg/20 bg-ink/70 text-xl leading-none text-fg transition hover:border-accent hover:text-accent sm:right-6">&#8250;</button>
     <figure class="w-full max-w-5xl">
-      <div id="lbMedia" class="overflow-hidden rounded-lg border border-white/10"></div>
+      <div id="lbMedia" class="overflow-hidden rounded-lg border border-fg/10"></div>
       <figcaption class="mt-3 text-center text-sm text-soft/70">
         <span id="lbCaption"></span>
         <span id="lbCounter" class="ml-2 font-mono text-xs text-accent/80"></span>
@@ -793,9 +933,45 @@
     'use strict';
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    /* ---------- Day / night mode ---------- */
+    var THEME_KEY = 'sd-theme';
+    var systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.querySelectorAll('.theme-toggle').forEach(function (btn) {
+        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to day mode' : 'Switch to night mode');
+        btn.setAttribute('aria-pressed', String(theme === 'light'));
+      });
+      /* the WebGL scene paints its own colours, so it listens for the switch */
+      window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: theme } }));
+    }
+    function currentTheme() {
+      return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    }
+
+    var stored = null;
+    try { stored = localStorage.getItem(THEME_KEY); } catch (e) {}
+    applyTheme(stored || (systemDark.matches ? 'dark' : 'light'));
+
+    document.querySelectorAll('.theme-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var next = currentTheme() === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      });
+    });
+
+    /* follow the OS until the visitor picks a side themselves */
+    systemDark.addEventListener('change', function (e) {
+      var saved = null;
+      try { saved = localStorage.getItem(THEME_KEY); } catch (err) {}
+      if (!saved) applyTheme(e.matches ? 'dark' : 'light');
+    });
+
     /* ---------- Navbar: transparent → solid after 80px ---------- */
     var navbar = document.getElementById('navbar');
-    var solidClasses = ['bg-ink/90', 'backdrop-blur-lg', 'border-b', 'border-white/10', 'shadow-lg'];
+    var solidClasses = ['bg-ink/90', 'backdrop-blur-lg', 'border-b', 'border-fg/10', 'shadow-lg'];
     function onScroll() {
       if (window.scrollY > 80) solidClasses.forEach(function (c) { navbar.classList.add(c); });
       else solidClasses.forEach(function (c) { navbar.classList.remove(c); });
@@ -1270,7 +1446,18 @@
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
 
-      scene.add(new THREE.HemisphereLight(0xffffff, 0x0a0a0a, 1.1));
+      /* Model tone flips with the theme: pale on black, graphite on white. */
+      const materials = [];
+      const isLight = () => document.documentElement.getAttribute('data-theme') === 'light';
+      const modelColor = () => (isLight() ? 0x55585c : 0x9a9a9a);
+      const groundColor = () => (isLight() ? 0xd8d8d8 : 0x0a0a0a);
+
+      const hemi = new THREE.HemisphereLight(0xffffff, groundColor(), 1.1);
+      scene.add(hemi);
+      window.addEventListener('themechange', () => {
+        hemi.groundColor.setHex(groundColor());
+        materials.forEach((m) => m.color.setHex(modelColor()));
+      });
       const key = new THREE.DirectionalLight(0xffffff, 1.6);
       key.position.set(4, 6, 5);
       scene.add(key);
@@ -1316,8 +1503,9 @@
 
         const g = new THREE.Group();
         const material = new THREE.MeshStandardMaterial({
-          color: 0x9a9a9a, metalness: 0.5, roughness: 0.38
+          color: modelColor(), metalness: 0.5, roughness: 0.38
         });
+        materials.push(material);
 
         /* Combined bounds across every component, so parts keep their relative places */
         const whole = new THREE.Box3();
