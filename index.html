@@ -190,6 +190,21 @@
       --logo-invert: 0;
       color: rgb(var(--soft));
     }
+    /* The veil is directional rather than a flat wash: it carries enough weight
+       under the copy on the left for the type to read, then clears to fully
+       transparent so most of the film shows exactly as shot. */
+    .hero-scrim {
+      background: linear-gradient(103deg,
+        rgb(var(--bg) / .88) 0%,
+        rgb(var(--bg) / .62) 34%,
+        rgb(var(--bg) / .18) 62%,
+        rgb(var(--bg) / 0) 85%);
+    }
+    @media (max-width: 767px) {
+      /* narrow screens put copy over the whole width, so the veil stays even */
+      .hero-scrim { background: rgb(var(--bg) / .62); }
+    }
+
     /* Over the hero film the bar needs light type too, until it goes solid. */
     #navbar.over-film {
       --bg: 0 0 0;
@@ -504,17 +519,17 @@
         <video src="assets/hero-bg.mp4" autoplay muted loop playsinline preload="metadata"
                class="bg-video absolute inset-0 h-full w-full object-cover"></video>
       </div>
-      <div class="hero-scrim pointer-events-none absolute inset-0 bg-ink/60"></div>
+      <div class="hero-scrim pointer-events-none absolute inset-0"></div>
       <div class="grid-lines grid-fade pointer-events-none absolute inset-0" aria-hidden="true"></div>
       <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/50 via-transparent to-ink"></div>
 
-      <div class="relative z-10 mx-auto w-full max-w-7xl px-6 pt-28 text-left sm:pt-32 lg:pt-36">
+      <!-- Pinned to the page's left edge at every width, not to a centred column -->
+      <div class="relative z-10 w-full px-6 pt-28 text-left sm:px-10 sm:pt-32 lg:px-14 lg:pt-36">
         <p class="reveal mb-4 text-[10px] font-semibold uppercase tracking-[0.3em] text-mute">
           Autonomous Aerial Systems &middot; Tashkent, Uzbekistan
         </p>
         <h1 class="reveal max-w-3xl text-3xl font-light leading-[1.05] tracking-tight text-fg sm:text-4xl lg:text-6xl" style="transition-delay:.08s">
-          Autonomous security.<br>
-          <span class="bg-gradient-to-r from-fg via-fg to-mute bg-clip-text text-transparent">Unthinkable speed.</span>
+          Autonomous security.<br>Unthinkable speed.
         </h1>
         <p class="reveal mt-5 max-w-lg text-sm leading-relaxed text-soft/80 sm:text-base" style="transition-delay:.16s">
           Spatial Defence builds AI-piloted aircraft that detect, decide, and act in seconds —
@@ -830,7 +845,7 @@
     <section id="news" class="film-section relative scroll-mt-24 overflow-hidden py-24 lg:py-32">
       <video src="assets/news-bg.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"
              class="bg-video absolute inset-0 h-full w-full object-cover"></video>
-      <div class="absolute inset-0 bg-ink/75" aria-hidden="true"></div>
+      <div class="absolute inset-0 bg-ink/40" aria-hidden="true"></div>
       <div class="absolute inset-0 bg-gradient-to-b from-ink via-transparent to-ink" aria-hidden="true"></div>
       <div class="relative z-10 mx-auto max-w-7xl px-6">
         <div class="reveal mb-14">
@@ -839,34 +854,34 @@
         </div>
 
         <div class="grid gap-6 md:grid-cols-3">
-          <article class="reveal sys-card rounded-xl border border-fg/10 bg-fg/[0.03] p-6 lg:p-7">
+          <article class="reveal sys-card rounded-xl border border-fg/20 bg-transparent p-6 backdrop-blur-sm lg:p-7">
             <time datetime="2025-11-18" class="font-mono text-xs uppercase tracking-widest text-mute">Nov 18, 2025</time>
             <h3 class="mt-3 text-lg font-bold leading-snug text-fg">
               Hawk 1 completes 400 km fully autonomous flight trial
             </h3>
-            <p class="mt-3 text-sm leading-relaxed text-soft/60">
+            <p class="mt-3 text-sm leading-relaxed text-soft/80">
               The prototype flew a full mission profile — vertical launch, cruise, target survey, and return — without operator input.
             </p>
             <a href="#" class="mt-5 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent">Read more <span aria-hidden="true">→</span></a>
           </article>
 
-          <article class="reveal sys-card rounded-xl border border-fg/10 bg-fg/[0.03] p-6 lg:p-7" style="transition-delay:.1s">
+          <article class="reveal sys-card rounded-xl border border-fg/20 bg-transparent p-6 backdrop-blur-sm lg:p-7" style="transition-delay:.1s">
             <time datetime="2025-09-02" class="font-mono text-xs uppercase tracking-widest text-mute">Sep 02, 2025</time>
             <h3 class="mt-3 text-lg font-bold leading-snug text-fg">
               Aegis Core selected for critical-infrastructure pilot programme
             </h3>
-            <p class="mt-3 text-sm leading-relaxed text-soft/60">
+            <p class="mt-3 text-sm leading-relaxed text-soft/80">
               A regional energy operator will deploy the interception layer across two solar generation sites.
             </p>
             <a href="#" class="mt-5 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent">Read more <span aria-hidden="true">→</span></a>
           </article>
 
-          <article class="reveal sys-card rounded-xl border border-fg/10 bg-fg/[0.03] p-6 lg:p-7" style="transition-delay:.2s">
+          <article class="reveal sys-card rounded-xl border border-fg/20 bg-transparent p-6 backdrop-blur-sm lg:p-7" style="transition-delay:.2s">
             <time datetime="2025-06-27" class="font-mono text-xs uppercase tracking-widest text-mute">Jun 27, 2025</time>
             <h3 class="mt-3 text-lg font-bold leading-snug text-fg">
               Spatial Defence opens flight-test facility near Tashkent
             </h3>
-            <p class="mt-3 text-sm leading-relaxed text-soft/60">
+            <p class="mt-3 text-sm leading-relaxed text-soft/80">
               The new range supports year-round testing of VTOL transitions, swarm coordination, and GPS-denied navigation.
             </p>
             <a href="#" class="mt-5 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-accent">Read more <span aria-hidden="true">→</span></a>
@@ -880,9 +895,8 @@
       <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent" aria-hidden="true"></div>
       <div class="reveal mx-auto max-w-4xl px-6 py-24 text-center lg:py-28">
         <img src="assets/logo-lockup.png" alt="Spatial Defence"
-             class="logo-img mx-auto mb-10 h-10 w-auto sm:h-12">
-        <h2 class="text-4xl font-extrabold tracking-tight text-fg lg:text-6xl">Join the mission</h2>
-        <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-soft/70">
+             class="logo-img mx-auto h-20 w-auto sm:h-28 lg:h-36">
+        <p class="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-soft/70">
           We are a small team solving hard problems in autonomy, flight, and AI — and every engineer here ships
           hardware that flies.
         </p>
