@@ -244,8 +244,10 @@
     .nav-chev { transition: transform .25s ease; }
 
     .mega {
-      position: absolute; top: calc(100% + 6px); left: 0;
-      width: 420px; padding: 10px;
+      /* anchored to the trigger's right edge — the menu now sits on the right,
+         so opening leftward keeps the panel inside the viewport */
+      position: absolute; top: calc(100% + 6px); right: 0;
+      width: 420px; max-width: calc(100vw - 32px); padding: 10px;
       border: 1px solid rgb(var(--fg) / .12);
       background: rgb(var(--surface) / .97);
       border-radius: 10px;
@@ -331,10 +333,14 @@
 
   <!-- ======================= NAVBAR ======================= -->
   <header id="navbar" class="fixed inset-x-0 top-0 z-50 transition-all duration-300">
-    <nav class="mx-auto flex h-20 max-w-7xl items-center justify-between px-6" aria-label="Main">
+    <!-- Same edge padding as the hero, so the wordmark lines up with the headline -->
+    <nav class="flex h-20 w-full items-center justify-between px-6 sm:px-10 lg:px-14" aria-label="Main">
       <a href="#top" class="flex shrink-0 items-center" aria-label="Spatial Defence — home">
         <img src="assets/logo-lockup.png" alt="Spatial Defence" class="logo-img h-8 w-auto sm:h-9">
       </a>
+
+      <!-- Everything else rides on the right -->
+      <div class="flex items-center gap-6">
 
       <!-- Desktop menu -->
       <div class="hidden items-center gap-1 lg:flex">
@@ -430,11 +436,13 @@
         </button>
         <button id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileSheet"
                 class="flex h-11 w-11 flex-col items-center justify-center gap-1.5">
-          <span class="hb-line block h-0.5 w-6 bg-white"></span>
-          <span class="hb-line block h-0.5 w-6 bg-white"></span>
-          <span class="hb-line block h-0.5 w-6 bg-white"></span>
+          <span class="hb-line block h-0.5 w-6 bg-fg"></span>
+          <span class="hb-line block h-0.5 w-6 bg-fg"></span>
+          <span class="hb-line block h-0.5 w-6 bg-fg"></span>
         </button>
       </div>
+
+      </div><!-- /right cluster -->
     </nav>
   </header>
 
