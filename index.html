@@ -175,18 +175,29 @@
     :root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
     :root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
 
-    /* Day mode: the two background films read as faint neutral texture rather
-       than photographs — colour under a white veil turns muddy, and black type
-       needs a calm ground. Content media (cards, galleries, lightbox) is
-       untouched and keeps its full colour. */
-    :root[data-theme="light"] .bg-video {
-      /* the slight blur keeps the film's burnt-in captions from reading as
-         stray text next to the headline */
-      filter: grayscale(1) brightness(1.32) contrast(.8) blur(2px);
-      opacity: .22;
-      transform: scale(1.02);   /* hides the soft edge the blur leaves */
+    /* The film sections keep their night treatment in both themes: full-colour
+       footage under a dark veil with light type. A white veil over colour reads
+       as washed-out, so day mode leaves these two blocks alone and they stay
+       exactly as crisp as they are at night. Re-declaring the tokens locally
+       flips every scrim, label, and button inside them in one go. */
+    .film-section {
+      --bg: 0 0 0;
+      --panel: 10 10 10;
+      --surface: 8 8 8;
+      --fg: 255 255 255;
+      --soft: 224 224 224;
+      --mute: 138 138 138;
+      --logo-invert: 0;
+      color: rgb(var(--soft));
     }
-    :root[data-theme="light"] .hero-scrim { background: rgb(var(--bg) / .55); }
+    /* Over the hero film the bar needs light type too, until it goes solid. */
+    #navbar.over-film {
+      --bg: 0 0 0;
+      --fg: 255 255 255;
+      --soft: 224 224 224;
+      --mute: 138 138 138;
+      --logo-invert: 0;
+    }
 
     /* ---- Capability index (category left, items right, hairline rules) ---- */
     .cap-row {
@@ -488,7 +499,7 @@
   <main id="top">
 
     <!-- ======================= HERO ======================= -->
-    <section class="relative flex min-h-screen items-start overflow-hidden">
+    <section class="film-section relative flex min-h-screen items-start overflow-hidden">
       <div class="absolute inset-0 overflow-hidden" aria-hidden="true">
         <video src="assets/hero-bg.mp4" autoplay muted loop playsinline preload="metadata"
                class="bg-video absolute inset-0 h-full w-full object-cover"></video>
@@ -816,7 +827,7 @@
     </section>
 
     <!-- ======================= NEWS / INSIGHTS ======================= -->
-    <section id="news" class="relative scroll-mt-24 overflow-hidden py-24 lg:py-32">
+    <section id="news" class="film-section relative scroll-mt-24 overflow-hidden py-24 lg:py-32">
       <video src="assets/news-bg.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"
              class="bg-video absolute inset-0 h-full w-full object-cover"></video>
       <div class="absolute inset-0 bg-ink/75" aria-hidden="true"></div>
@@ -868,6 +879,8 @@
     <section id="careers" class="scroll-mt-24 relative overflow-hidden bg-panel">
       <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent" aria-hidden="true"></div>
       <div class="reveal mx-auto max-w-4xl px-6 py-24 text-center lg:py-28">
+        <img src="assets/logo-lockup.png" alt="Spatial Defence"
+             class="logo-img mx-auto mb-10 h-10 w-auto sm:h-12">
         <h2 class="text-4xl font-extrabold tracking-tight text-fg lg:text-6xl">Join the mission</h2>
         <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-soft/70">
           We are a small team solving hard problems in autonomy, flight, and AI — and every engineer here ships
@@ -983,8 +996,10 @@
     var navbar = document.getElementById('navbar');
     var solidClasses = ['bg-ink/90', 'backdrop-blur-lg', 'border-b', 'border-fg/10', 'shadow-lg'];
     function onScroll() {
-      if (window.scrollY > 80) solidClasses.forEach(function (c) { navbar.classList.add(c); });
-      else solidClasses.forEach(function (c) { navbar.classList.remove(c); });
+      var scrolled = window.scrollY > 80;
+      solidClasses.forEach(function (c) { navbar.classList.toggle(c, scrolled); });
+      /* while the bar floats over the hero film it borrows the dark treatment */
+      navbar.classList.toggle('over-film', !scrolled);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
