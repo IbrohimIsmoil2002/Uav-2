@@ -205,9 +205,14 @@
       .hero-scrim { background: rgb(var(--bg) / .62); }
     }
 
-    /* Over the hero film the bar needs light type too, until it goes solid. */
+    /* Over the hero film the bar needs light type too, until it goes solid.
+       This also has to cover --surface/--panel: the mega-menu and its icons
+       live inside #navbar and inherit these tokens, so leaving them light
+       gave white text and white icons on a white dropdown panel in day mode. */
     #navbar.over-film {
       --bg: 0 0 0;
+      --panel: 10 10 10;
+      --surface: 8 8 8;
       --fg: 255 255 255;
       --soft: 224 224 224;
       --mute: 138 138 138;
@@ -239,7 +244,7 @@
       font-size: 13px; font-weight: 500; color: rgb(var(--soft) / .72);
       transition: background .2s ease, color .2s ease;
     }
-    .nav-link:hover, .nav-item[data-open="true"] > .nav-link { background: rgb(var(--fg) / .07); color: #fff; }
+    .nav-link:hover, .nav-item[data-open="true"] > .nav-link { background: rgb(var(--fg) / .07); color: rgb(var(--fg)); }
     .nav-item[data-open="true"] .nav-chev { transform: rotate(180deg); }
     .nav-chev { transition: transform .25s ease; }
 
@@ -261,7 +266,7 @@
       transition: background .2s ease;
     }
     .mega-item:hover { background: rgb(var(--fg) / .07); }
-    .mega-item svg { flex-shrink: 0; margin-top: 2px; color: #fff; }
+    .mega-item svg { flex-shrink: 0; margin-top: 2px; color: rgb(var(--fg)); }
 
     /* ---- Search dialog ---- */
     .cmd-backdrop {
@@ -281,9 +286,9 @@
       font-size: 14px; color: rgb(var(--soft) / .85);
       transition: background .15s ease, color .15s ease;
     }
-    .cmd-result:hover, .cmd-result.is-active { background: rgb(var(--fg) / .1); color: #fff; }
+    .cmd-result:hover, .cmd-result.is-active { background: rgb(var(--fg) / .1); color: rgb(var(--fg)); }
     .cmd-result svg { flex-shrink: 0; color: #8a8a8a; }
-    .cmd-result:hover svg, .cmd-result.is-active svg { color: #fff; }
+    .cmd-result:hover svg, .cmd-result.is-active svg { color: rgb(var(--fg)); }
     kbd {
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px;
       padding: 2px 6px; border: 1px solid rgb(var(--fg) / .18);
